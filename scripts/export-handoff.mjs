@@ -119,6 +119,16 @@ Create premium commercial-film realism: believable human-scale locations; real g
 
 The prompt files in \`prompts/\` are UTF-8 and are the source text to paste unchanged. \`generation-manifest.json\` is the machine-readable version of every setting, dependency, filename, and quoted cost below.
 
+## Working directory and folders
+
+Run every command from the handoff pack root: the directory where \`README.md\`, \`generation-manifest.json\`, and \`prompts/\` are visible. Every \`prompts/...\`, \`.render/raw/...\`, and \`.render/frames/...\` path in this guide is relative to this folder. A user with only this folder has everything needed for asset generation and boundary-frame extraction.
+
+Create the local output folders once:
+
+\`\`\`bash
+mkdir -p .render/raw .render/frames .render/jobs
+\`\`\`
+
 ## Critical balance warning
 
 The last observed Higgsfield workspace balance was **1.95 credits**. The complete base batch is **224.5 credits**; 15% reroll headroom is **33.675 credits**, making the planned total **258.175 credits**. **Do not batch or submit any jobs until the account has enough credits or its free-trial allowance is confirmed.** Quotes are a snapshot from 2026-07-21 and may change; check the live quote before every submission.
@@ -128,9 +138,9 @@ The last observed Higgsfield workspace balance was **1.95 credits**. The complet
 1. Generate all six stills in the listed order. Save the original PNG downloads under the exact paths shown.
 2. Review all six stills together before generating any dives. Reject any still that breaks realism, continuity, or the quality checks below.
 3. Generate all six 8-second dives, each conditioned on its exact approved still. Save the original MP4 downloads under the exact paths shown.
-4. After all dives are present in the project, run \`./scripts/render.sh frames\`. This extracts the actual first and last boundary frames.
+4. After all dives are present under this pack's \`.render/raw/\` folder, run the direct FFmpeg extraction loop below. It creates all 12 actual first/last boundary PNGs without any repository scripts.
 5. Generate the five 5-second connectors in order, using those actual boundary frames as both start and end conditioning images. Never use an imagined or recreated boundary frame.
-6. Return the 17 raw files listed at the end. We will then run \`./scripts/render.sh encode\` and \`./scripts/render.sh verify\` in the project.
+6. Return the 17 raw files listed at the end. Only after those files are copied back into the repository will we run the repository's \`./scripts/render.sh encode\` and \`./scripts/render.sh verify\` commands.
 
 ## Higgsfield UI attributes
 
@@ -186,11 +196,17 @@ Stop after these six. Compare them side by side and approve the set before spend
 |---|---|---|---|---|---:|
 ${tableRows(diveJobs)}
 
-After all six dive files have been copied into the project, run:
+After all six dive files are saved under this pack root, extract the 12 actual boundary frames directly with FFmpeg:
 
 \`\`\`bash
-./scripts/render.sh frames
+for name in marinemax southeast-toyota-finance iata aspen-snowmass honda-powersports seaworld; do
+  input=".render/raw/dive-$name.mp4"
+  ffmpeg -v error -y -ss 0 -i "$input" -frames:v 1 ".render/frames/first-$name.png"
+  ffmpeg -v error -y -sseof -0.15 -i "$input" -frames:v 1 ".render/frames/last-$name.png"
+done
 \`\`\`
+
+Confirm that \`.render/frames/\` now contains \`first-<case>.png\` and \`last-<case>.png\` for all six cases before generating a connector.
 
 ### 3 — Generate all connectors from actual boundary frames
 
@@ -219,6 +235,17 @@ Connector:
 \`\`\`bash
 higgsfield generate create seedance_2_0_mini --prompt "$(cat [PROMPT_FILE])" --start-image [ACTUAL_LAST_FRAME_PNG] --end-image [ACTUAL_FIRST_FRAME_PNG] --bitrate_mode standard --generate_audio false --resolution 720p --aspect_ratio 16:9 --duration 5 --genre auto --wait --wait-timeout 20m --json
 \`\`\`
+
+### Save one completed result URL under its exact filename
+
+For a single job, redirect the CLI's completed JSON response to \`.render/jobs/[JOB_ID].json\`. Then use this download-only example, replacing \`[JOB_ID]\` and \`[OUTPUT_FILE]\` with that row's values. It does not submit a generation job:
+
+\`\`\`bash
+result_url=$(jq -r '.[0].result_url // empty' ".render/jobs/[JOB_ID].json")
+test -n "$result_url" && curl -fsSL "$result_url" -o "[OUTPUT_FILE]"
+\`\`\`
+
+For example, MarineMax's still output path is \`.render/raw/still-marinemax.png\`. Keep each original download at its table path; do not rename or pre-encode it.
 
 ## Quality checks
 

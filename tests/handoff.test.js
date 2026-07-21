@@ -153,8 +153,13 @@ test('tracked handoff pack is byte-identical to a fresh export', async () => {
 test('standalone README contains the safe manual generation workflow', async () => {
   const readme = await readFile(`${trackedPack}/README.md`, 'utf8');
   assert.match(readme, /photorealistic cinematic/i);
+  assert.match(readme, /run every command from the handoff pack root/i);
+  assert.match(readme, /README\.md.*prompts\//is);
+  assert.match(readme, /mkdir -p \.render\/raw \.render\/frames/);
   assert.match(readme, /all six stills.*review.*before.*dives/is);
-  assert.match(readme, /\.\/scripts\/render\.sh frames/);
+  assert.match(readme, /ffmpeg[\s\S]*-ss 0[\s\S]*\.render\/frames\/first-/);
+  assert.match(readme, /ffmpeg[\s\S]*-sseof -0\.15[\s\S]*\.render\/frames\/last-/);
+  assert.doesNotMatch(readme, /\.\/scripts\/render\.sh frames/);
   assert.match(readme, /actual boundary frames/i);
   assert.match(readme, /\.\/scripts\/render\.sh encode/);
   assert.match(readme, /\.\/scripts\/render\.sh verify/);
