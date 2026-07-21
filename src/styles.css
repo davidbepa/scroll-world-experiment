@@ -31,3 +31,33 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
   .poster-case { grid-template-columns:1fr; padding:60px 0; }
 }
 @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation:none!important; transition:none!important; } }
+
+/* Desktop scroll-world skin. Engine selectors stay namespaced under .sw-root. */
+.sw-root {
+  --sw-bg:var(--lavender);
+  --sw-ink:var(--ink);
+  --sw-ink-soft:color-mix(in srgb,var(--ink) 70%,var(--lavender));
+  --sw-accent:var(--purple);
+  --sw-font-display:"Titillium Web",system-ui,sans-serif;
+  --sw-font-body:"Open Sans",system-ui,sans-serif;
+}
+.sw-root .sw-topbar { display:none; }
+.sw-root .sw-sky { background:var(--lavender); }
+.sw-root .sw-copylayer::before { background:linear-gradient(90deg,var(--lavender) 0%,color-mix(in srgb,var(--lavender) 92%,transparent) 45%,transparent 100%); }
+.sw-root .sw-copy,.sw-root .sw-hero { left:clamp(24px,6vw,88px); width:min(40vw,520px); }
+.sw-root .sw-copy__eyebrow,.sw-root .sw-hero__eyebrow { color:var(--purple); }
+.sw-root .sw-copy__title,.sw-root .sw-hero__title { font-family:"Titillium Web",system-ui,sans-serif; }
+.sw-root .sw-copy__body,.sw-root .sw-hero__body { font-family:"Open Sans",system-ui,sans-serif; }
+.sw-root .sw-btn--primary { background:var(--yellow); color:var(--ink); }
+.sw-root .sw-route { right:clamp(18px,3vw,44px); }
+.sw-root .sw-route::before { background:var(--purple); }
+.sw-root .sw-route__dot i { background:color-mix(in srgb,var(--purple) 38%,transparent); }
+.sw-root .sw-route__dot:hover i,.sw-root .sw-route__dot.is-active i { background:var(--purple); }
+.sw-root .sw-route__dot.is-active i { box-shadow:0 0 0 5px color-mix(in srgb,var(--purple) 22%,transparent); }
+.sw-root .sw-status { bottom:clamp(24px,4vh,48px); padding:10px 16px; border:1px solid color-mix(in srgb,var(--ink) 14%,transparent); border-radius:999px; background:color-mix(in srgb,var(--white) 55%,transparent); backdrop-filter:blur(10px); }
+.sw-root .sw-status__bar i { background:var(--purple); }
+.sw-root .sw-hint { display:none; }
+
+@media (min-width:861px) {
+  .site-header { background:linear-gradient(180deg,color-mix(in srgb,var(--lavender) 92%,transparent),transparent); }
+}
