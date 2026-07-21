@@ -89,7 +89,7 @@ export function createWorldConfig() {
     crossfade: 0.08,
     atmosphere: true,
     nav: false,
-    sections: CASES.map(scene => ({ ...scene, still: scene.still.replace(/^public\//, ''), clip: scene.clip.replace(/^public\//, '') })),
-    connectors: CONNECTORS.map(path => path.replace(/^public\//, '')),
+    sections: CASES.map(scene => ({ ...scene })),
+    connectors: [...CONNECTORS],
   };
 }

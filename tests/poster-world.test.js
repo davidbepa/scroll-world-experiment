@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mountPosterWorld, renderPosterHTML } from '../src/poster-world.js';
-import { CASES } from '../src/cases.js';
+import { CASES, createWorldConfig } from '../src/cases.js';
 
 test('poster mode renders all cases, proofs, sources, and final CTA', () => {
   const html = renderPosterHTML(CASES);
@@ -27,4 +27,15 @@ test('poster mode mounts its markup and mode on the container', () => {
 
   assert.equal(container.dataset.mode, 'posters');
   assert.equal(container.innerHTML, renderPosterHTML(CASES));
+});
+
+test('runtime asset URLs resolve from the repository-root static server', () => {
+  const html = renderPosterHTML(CASES);
+  const config = createWorldConfig();
+
+  assert.match(html, /src="public\/assets\/stills\/marinemax\.webp"/);
+  assert.match(html, /this\.src='public\/assets\/fallback-system\.svg'/);
+  assert.ok(config.sections.every(scene => scene.still.startsWith('public/assets/stills/')));
+  assert.ok(config.sections.every(scene => scene.clip.startsWith('public/assets/video/')));
+  assert.ok(config.connectors.every(path => path.startsWith('public/assets/video/')));
 });

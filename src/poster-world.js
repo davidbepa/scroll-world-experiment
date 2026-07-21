@@ -10,7 +10,7 @@ export function renderPosterHTML(cases) {
       <p>We connect strategy, design, technology, data, AI and marketing to create digital experiences that perform.</p>
     </section>
     ${cases.map((scene, index) => `<article class="poster-case" id="${escapeHTML(scene.id)}">
-      <img src="${escapeHTML(scene.still.replace(/^public\//, ''))}" onerror="this.src='assets/fallback-system.svg'" alt="" />
+      <img src="${escapeHTML(scene.still)}" onerror="this.onerror=null;this.src='public/assets/fallback-system.svg'" alt="" />
       <div><span>${String(index + 1).padStart(2, '0')} / ${String(cases.length).padStart(2, '0')}</span>
       <p class="eyebrow">${escapeHTML(scene.eyebrow)}</p><h2>${escapeHTML(scene.title)}</h2>
       <p>${escapeHTML(scene.body)}</p><strong>${escapeHTML(scene.proof)}</strong>
