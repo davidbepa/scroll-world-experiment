@@ -7,7 +7,7 @@
 
 ## Result
 
-The MarineMax still was generated and accepted. The calibration dive was not submitted: Higgsfield quoted 20 credits for the approved 8-second Mini render while the selected workspace showed only 1.95 visible credits remaining. The free-trial allowance is not shown separately by the CLI, so it cannot be quantified safely.
+The glossy MarineMax still was generated and accepted only as historical calibration evidence for quality and cost under the direction approved at that time. It is now superseded by the user's photorealistic cinematic direction and must be replaced before production. The calibration dive was not submitted: Higgsfield quoted 20 credits for the approved 8-second Mini render while the selected workspace showed only 1.95 visible credits remaining. The free-trial allowance is not shown separately by the CLI, so it cannot be quantified safely.
 
 **Batch authorized: no**
 
@@ -73,11 +73,13 @@ This request produced no asset and incurred no visible charge. The corrected inv
 - Model: `gpt_image_2`, 3:2, 2k, high quality
 - Status: `completed`
 - Raw output: `.render/raw/still-marinemax.png`
-- Shipped poster: `public/assets/stills/marinemax.webp`
+- Temporary calibration poster/fallback: `public/assets/stills/marinemax.webp`
 
 The CLI's wait request ended with HTTP 403 and wrote an empty result array, but `higgsfield generate list --json` showed the job completed with a result URL. The completed result was downloaded directly and converted to WebP.
 
-Visual decision: **accepted**. The image has glossy vinyl/plastic materials, a centered modular composition, lavender/purple/yellow/ink/white Verndale colors, a clear hero yacht, and an understandable connected discovery/commerce system. No legible text or brand logo is present.
+Historical visual decision: **accepted for calibration evidence only under the then-current glossy direction**. The image has glossy vinyl/plastic materials, a centered modular composition, lavender/purple/yellow/ink/white Verndale colors, a clear hero yacht, and an understandable connected discovery/commerce system. No legible text or brand logo is present.
+
+Current production decision: **not approved as final art**. The user's subsequent photorealistic cinematic direction supersedes this glossy treatment, so a replacement still must be generated and approved before production. `public/assets/stills/marinemax.webp` may remain temporarily as calibration evidence or a technical fallback, but it must not be represented or shipped as approved final artwork.
 
 ### MarineMax dive
 
