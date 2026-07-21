@@ -12,6 +12,12 @@ test('render pipeline is Bash 3.2-safe and uses the approved Draft model', async
   assert.match(common, /--resolution 720p/);
   assert.match(common, /--start-image/);
   assert.match(common, /--end-image/);
+  assert.match(common, /-c:v libx264/);
+  assert.match(common, /-crf 20/);
+  assert.match(common, /-g 8/);
+  assert.match(common, /-keyint_min 8/);
+  assert.match(common, /-an/);
+  assert.match(common, /-movflags \+faststart/);
   assert.match(runner, /last-\$prev\.png/);
   assert.match(runner, /first-\$name\.png/);
 });
