@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { mountPosterWorld, renderPosterHTML } from '../src/poster-world.js';
 import { CASES, createWorldConfig } from '../src/cases.js';
 
@@ -38,4 +39,13 @@ test('runtime asset URLs resolve from the repository-root static server', () => 
   assert.ok(config.sections.every(scene => scene.still.startsWith('public/assets/stills/')));
   assert.ok(config.sections.every(scene => scene.clip.startsWith('public/assets/video/')));
   assert.ok(config.connectors.every(path => path.startsWith('public/assets/video/')));
+});
+
+test('fallback artwork uses only the binding five-color palette', () => {
+  const svg = readFileSync(new URL('../public/assets/fallback-system.svg', import.meta.url), 'utf8');
+  const colors = svg.match(/#[0-9a-f]{6}/gi) || [];
+  const palette = new Set(['#FFB800', '#6A2FF3', '#E1D5FD', '#1C1C1C', '#FFFFFF']);
+
+  assert.ok(colors.length > 0);
+  assert.deepEqual(colors.filter(color => !palette.has(color.toUpperCase())), []);
 });
