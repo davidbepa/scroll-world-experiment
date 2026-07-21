@@ -22,6 +22,14 @@ test('render pipeline is Bash 3.2-safe and uses the approved Draft model', async
   assert.match(runner, /first-\$name\.png/);
 });
 
+test('Seedance Mini options match the live Higgsfield CLI schema', async () => {
+  const common = await readFile('scripts/render-common.sh', 'utf8');
+  assert.match(common, /--bitrate_mode standard/);
+  assert.match(common, /--generate_audio false/);
+  assert.match(common, /--resolution 720p/);
+  assert.doesNotMatch(common, /--mode(?:\s|=)/);
+});
+
 test('render runner exposes every approved noninteractive stage and encoding flag', async () => {
   const runner = await readFile('scripts/render.sh', 'utf8');
   for (const stage of ['calibrate', 'stills', 'contact-sheet', 'dives', 'frames', 'connectors', 'encode', 'verify']) {

@@ -11,7 +11,7 @@ STILL_DIR="$PROJECT_ROOT/public/assets/stills"
 VIDEO_DIR="$PROJECT_ROOT/public/assets/video"
 NAMES="marinemax southeast-toyota-finance iata aspen-snowmass honda-powersports seaworld"
 VMODEL="seedance_2_0_mini"
-VOPTS="--mode std --resolution 720p"
+VOPTS="--bitrate_mode standard --generate_audio false --resolution 720p"
 DIVE_DUR=8
 CONN_DUR=5
 
