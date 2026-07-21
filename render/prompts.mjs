@@ -1,0 +1,9 @@
+export const STYLE_PREAMBLE = 'Isometric glossy vinyl-toy diorama floating as a precise modular system on a plain solid #E1D5FD background with a soft contact shadow beneath it. Smooth polished plastic shading, subtle translucent acrylic details, soft studio rim light, refined collectible product-film look, gentle depth of field. Cohesive color palette of sun yellow #FFB800, electric purple #6A2FF3, lavender #E1D5FD, ink #1C1C1C, and white #FFFFFF. Premium, precise, inventive, highly detailed, centered composition, generous headroom, absolutely no text, no letters, no numbers, no logos.';
+
+export const STYLE_TAIL = 'Glossy vinyl-toy modular system, smooth polished plastic shading, translucent acrylic details, soft studio rim light, gentle depth of field, sun yellow #FFB800, electric purple #6A2FF3, lavender #E1D5FD, ink #1C1C1C, and white #FFFFFF.';
+
+export const buildStillPrompt = scene => `${STYLE_PREAMBLE}\nSubject: ${scene.subject}`;
+
+export const buildDivePrompt = scene => `Single continuous cinematic camera move, no cuts. Begin high and far, looking down at the whole ${scene.label} modular system from outside like a precise collectible model. The camera slowly glides forward and descends toward ${scene.focalPoint}, flying inside the working system as upper modules gently separate to reveal the interior mechanisms. ${STYLE_TAIL} Smooth, graceful, slow motion, subtle parallax. No text, no captions.`;
+
+export const buildConnectorPrompt = (from, to) => `Single continuous cinematic camera move, no cuts. The camera smoothly pulls up and back out of the ${from.label} modular system, rises to reveal the connected Verndale ecosystem, follows a luminous sun-yellow signal path forward, and arrives above the ${to.label} modular system, beginning to descend toward ${to.focalPoint}. One connected glossy systems world, seamless flowing transition. ${STYLE_TAIL} Smooth graceful slow motion. No text, no captions.`;
