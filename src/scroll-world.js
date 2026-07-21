@@ -13,6 +13,7 @@ import {
 } from './timeline.js';
 
 const FALLBACK_STILL = 'public/assets/fallback-system.svg';
+const stylesheetRegistry = new WeakMap();
 
 function mountScrollWorld(container, config) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,7 +39,7 @@ function mountScrollWorld(container, config) {
     heroScroll: HERO_SCROLL,
   });
 
-  injectCSS();
+  const stylesheetLease = injectCSS();
   container.classList.add('sw-root');
   container.dataset.mode = 'film';
 
@@ -422,6 +423,7 @@ function mountScrollWorld(container, config) {
     mountedNodes.forEach(node => node.remove());
     container.classList.remove('sw-root');
     delete container.dataset.mode;
+    releaseCSS(stylesheetLease);
   }
 
   listen(window, 'pointerdown', onFirstGesture, { once: true, passive: true });
@@ -482,7 +484,16 @@ function seedParticles(host, reduce) {
 }
 
 function injectCSS() {
-  if (document.getElementById('sw-css')) return;
+  const existing = document.getElementById('sw-css');
+  const registered = stylesheetRegistry.get(document);
+  if (existing) {
+    if (registered?.element === existing) {
+      registered.users += 1;
+      return registered;
+    }
+    return null;
+  }
+  stylesheetRegistry.delete(document);
   const css = `
   .sw-root{--sw-bg:#F5EDE0;--sw-ink:#241d2b;--sw-ink-soft:#6a6072;--sw-accent:#8a7bb5;
     --sw-font-display:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;
@@ -511,7 +522,8 @@ function injectCSS() {
   .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;}
   .sw-scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity;}
   .sw-scene__video,.sw-scene__still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;}
-  .sw-scene__still{will-change:transform}.sw-scene.has-clip .sw-scene__still{opacity:0}.sw-scene__video{z-index:1;}
+  .sw-scene__still{will-change:transform}.sw-scene.has-clip .sw-scene__still{opacity:0}
+  .sw-scene__video{z-index:1;opacity:0;visibility:hidden;}.sw-scene.has-clip .sw-scene__video{opacity:1;visibility:visible;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
   .sw-copy,.sw-hero{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,520px);opacity:0;will-change:opacity,transform;}
@@ -559,6 +571,17 @@ function injectCSS() {
   style.id = 'sw-css';
   style.textContent = `@layer sw {\n${css}\n}`;
   document.head.appendChild(style);
+  const lease = { document, element: style, users: 1 };
+  stylesheetRegistry.set(document, lease);
+  return lease;
+}
+
+function releaseCSS(lease) {
+  if (!lease || stylesheetRegistry.get(lease.document) !== lease) return;
+  lease.users -= 1;
+  if (lease.users > 0) return;
+  lease.element.remove();
+  stylesheetRegistry.delete(lease.document);
 }
 
 export { mountScrollWorld };

@@ -1,0 +1,223 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mountScrollWorld } from '../src/scroll-world.js';
+
+class FakeClassList {
+  constructor(element) {
+    this.element = element;
+    this.values = new Set();
+  }
+
+  set(value) {
+    this.values = new Set(String(value).split(/\s+/).filter(Boolean));
+  }
+
+  add(...values) {
+    values.forEach(value => this.values.add(value));
+  }
+
+  remove(...values) {
+    values.forEach(value => this.values.delete(value));
+  }
+
+  contains(value) {
+    return this.values.has(value);
+  }
+
+  toggle(value, force) {
+    const active = force === undefined ? !this.contains(value) : force;
+    if (active) this.add(value);
+    else this.remove(value);
+    return active;
+  }
+}
+
+class FakeElement {
+  constructor(tagName) {
+    this.tagName = tagName.toUpperCase();
+    this.children = [];
+    this.parentNode = null;
+    this.classList = new FakeClassList(this);
+    this.style = { setProperty(name, value) { this[name] = value; } };
+    this.dataset = {};
+    this.attributes = new Map();
+    this.id = '';
+    this.textContent = '';
+    this.innerHTML = '';
+    this.listeners = new Map();
+  }
+
+  set className(value) {
+    this.classList.set(value);
+  }
+
+  get className() {
+    return [...this.classList.values].join(' ');
+  }
+
+  appendChild(child) {
+    child.parentNode = this;
+    this.children.push(child);
+    return child;
+  }
+
+  append(...children) {
+    children.forEach(child => this.appendChild(child));
+  }
+
+  remove() {
+    if (!this.parentNode) return;
+    this.parentNode.children = this.parentNode.children.filter(child => child !== this);
+    this.parentNode = null;
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
+
+  getAttribute(name) {
+    return this.attributes.get(name) ?? null;
+  }
+
+  removeAttribute(name) {
+    this.attributes.delete(name);
+  }
+
+  addEventListener(type, handler) {
+    const handlers = this.listeners.get(type) || new Set();
+    handlers.add(handler);
+    this.listeners.set(type, handlers);
+  }
+
+  removeEventListener(type, handler) {
+    this.listeners.get(type)?.delete(handler);
+  }
+
+  querySelectorAll(selector) {
+    const className = selector.startsWith('.') ? selector.slice(1) : null;
+    const matches = [];
+    const visit = node => {
+      if (className && node.classList.contains(className)) matches.push(node);
+      node.children.forEach(visit);
+    };
+    this.children.forEach(visit);
+    return matches;
+  }
+}
+
+function createBrowserFixture() {
+  const head = new FakeElement('head');
+  const body = new FakeElement('body');
+  const document = {
+    head,
+    body,
+    createElement: tagName => new FakeElement(tagName),
+    getElementById(id) {
+      let match = null;
+      const visit = node => {
+        if (node.id === id) match = node;
+        node.children.forEach(visit);
+      };
+      visit(head);
+      visit(body);
+      return match;
+    },
+  };
+  const listeners = new Map();
+  const window = {
+    innerHeight: 900,
+    innerWidth: 1440,
+    scrollY: 0,
+    pageYOffset: 0,
+    matchMedia: query => ({ matches: query.includes('prefers-reduced-motion') }),
+    addEventListener(type, handler) {
+      const handlers = listeners.get(type) || new Set();
+      handlers.add(handler);
+      listeners.set(type, handlers);
+    },
+    removeEventListener(type, handler) {
+      listeners.get(type)?.delete(handler);
+    },
+    scrollTo() {},
+  };
+  const previous = {
+    window: globalThis.window,
+    document: globalThis.document,
+    requestAnimationFrame: globalThis.requestAnimationFrame,
+    cancelAnimationFrame: globalThis.cancelAnimationFrame,
+  };
+  globalThis.window = window;
+  globalThis.document = document;
+  globalThis.requestAnimationFrame = () => 1;
+  globalThis.cancelAnimationFrame = () => {};
+
+  return {
+    document,
+    createRoot() {
+      const root = new FakeElement('main');
+      body.appendChild(root);
+      return root;
+    },
+    restore() {
+      Object.assign(globalThis, previous);
+    },
+  };
+}
+
+function config() {
+  return {
+    atmosphere: false,
+    nav: false,
+    sections: [{ id: 'one', label: 'One', still: '', clip: '', scroll: 1 }],
+    connectors: [],
+  };
+}
+
+test('video stays hidden until its scene has painted a clip', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const controller = mountScrollWorld(fixture.createRoot(), config());
+    const css = fixture.document.getElementById('sw-css').textContent;
+
+    assert.match(css, /\.sw-scene__video\{[^}]*opacity:0;[^}]*visibility:hidden;/);
+    assert.match(css, /\.sw-scene\.has-clip \.sw-scene__video\{[^}]*opacity:1;[^}]*visibility:visible;/);
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('engine stylesheet remains until the last simultaneous mount is destroyed', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const first = mountScrollWorld(fixture.createRoot(), config());
+    const stylesheet = fixture.document.getElementById('sw-css');
+    const second = mountScrollWorld(fixture.createRoot(), config());
+
+    first.destroy();
+    assert.equal(fixture.document.getElementById('sw-css'), stylesheet);
+
+    second.destroy();
+    assert.equal(fixture.document.getElementById('sw-css'), null);
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('destroy never removes a pre-existing external sw-css stylesheet', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const external = fixture.document.createElement('style');
+    external.id = 'sw-css';
+    external.textContent = '/* external */';
+    fixture.document.head.appendChild(external);
+
+    const controller = mountScrollWorld(fixture.createRoot(), config());
+    controller.destroy();
+
+    assert.equal(fixture.document.getElementById('sw-css'), external);
+    assert.equal(external.textContent, '/* external */');
+  } finally {
+    fixture.restore();
+  }
+});
