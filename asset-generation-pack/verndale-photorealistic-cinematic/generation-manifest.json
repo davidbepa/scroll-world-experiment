@@ -1,0 +1,341 @@
+{
+  "name": "Verndale Photorealistic Cinematic Asset Generation Pack",
+  "schemaSnapshot": {
+    "date": "2026-07-21",
+    "higgsfieldCliVersion": "1.1.19"
+  },
+  "direction": "Photorealistic premium commercial-film realism across six connected, human-scale environments.",
+  "costs": {
+    "currency": "credits",
+    "stills": 42,
+    "dives": 120,
+    "connectors": 62.5,
+    "baseTotal": 224.5,
+    "rerollHeadroomPercent": 15,
+    "rerollHeadroom": 33.675,
+    "plannedTotal": 258.175,
+    "observedBalance": 1.95
+  },
+  "jobs": [
+    {
+      "id": "still-marinemax",
+      "type": "still",
+      "case": "marinemax",
+      "promptFile": "prompts/still-marinemax.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-marinemax.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "still-southeast-toyota-finance",
+      "type": "still",
+      "case": "southeast-toyota-finance",
+      "promptFile": "prompts/still-southeast-toyota-finance.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-southeast-toyota-finance.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "still-iata",
+      "type": "still",
+      "case": "iata",
+      "promptFile": "prompts/still-iata.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-iata.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "still-aspen-snowmass",
+      "type": "still",
+      "case": "aspen-snowmass",
+      "promptFile": "prompts/still-aspen-snowmass.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-aspen-snowmass.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "still-honda-powersports",
+      "type": "still",
+      "case": "honda-powersports",
+      "promptFile": "prompts/still-honda-powersports.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-honda-powersports.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "still-seaworld",
+      "type": "still",
+      "case": "seaworld",
+      "promptFile": "prompts/still-seaworld.txt",
+      "model": "gpt_image_2",
+      "attributes": {
+        "aspect_ratio": "16:9",
+        "resolution": "2k",
+        "quality": "high"
+      },
+      "conditioningInputs": {},
+      "outputFile": ".render/raw/still-seaworld.png",
+      "quotedCredits": 7
+    },
+    {
+      "id": "dive-marinemax",
+      "type": "dive",
+      "case": "marinemax",
+      "promptFile": "prompts/dive-marinemax.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-marinemax.png"
+      },
+      "outputFile": ".render/raw/dive-marinemax.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "dive-southeast-toyota-finance",
+      "type": "dive",
+      "case": "southeast-toyota-finance",
+      "promptFile": "prompts/dive-southeast-toyota-finance.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-southeast-toyota-finance.png"
+      },
+      "outputFile": ".render/raw/dive-southeast-toyota-finance.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "dive-iata",
+      "type": "dive",
+      "case": "iata",
+      "promptFile": "prompts/dive-iata.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-iata.png"
+      },
+      "outputFile": ".render/raw/dive-iata.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "dive-aspen-snowmass",
+      "type": "dive",
+      "case": "aspen-snowmass",
+      "promptFile": "prompts/dive-aspen-snowmass.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-aspen-snowmass.png"
+      },
+      "outputFile": ".render/raw/dive-aspen-snowmass.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "dive-honda-powersports",
+      "type": "dive",
+      "case": "honda-powersports",
+      "promptFile": "prompts/dive-honda-powersports.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-honda-powersports.png"
+      },
+      "outputFile": ".render/raw/dive-honda-powersports.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "dive-seaworld",
+      "type": "dive",
+      "case": "seaworld",
+      "promptFile": "prompts/dive-seaworld.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 8,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/raw/still-seaworld.png"
+      },
+      "outputFile": ".render/raw/dive-seaworld.mp4",
+      "quotedCredits": 20
+    },
+    {
+      "id": "connector-1",
+      "type": "connector",
+      "from": "marinemax",
+      "to": "southeast-toyota-finance",
+      "promptFile": "prompts/connector-1.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 5,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/frames/last-marinemax.png",
+        "end_image": ".render/frames/first-southeast-toyota-finance.png"
+      },
+      "outputFile": ".render/raw/connector-1.mp4",
+      "quotedCredits": 12.5
+    },
+    {
+      "id": "connector-2",
+      "type": "connector",
+      "from": "southeast-toyota-finance",
+      "to": "iata",
+      "promptFile": "prompts/connector-2.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 5,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/frames/last-southeast-toyota-finance.png",
+        "end_image": ".render/frames/first-iata.png"
+      },
+      "outputFile": ".render/raw/connector-2.mp4",
+      "quotedCredits": 12.5
+    },
+    {
+      "id": "connector-3",
+      "type": "connector",
+      "from": "iata",
+      "to": "aspen-snowmass",
+      "promptFile": "prompts/connector-3.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 5,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/frames/last-iata.png",
+        "end_image": ".render/frames/first-aspen-snowmass.png"
+      },
+      "outputFile": ".render/raw/connector-3.mp4",
+      "quotedCredits": 12.5
+    },
+    {
+      "id": "connector-4",
+      "type": "connector",
+      "from": "aspen-snowmass",
+      "to": "honda-powersports",
+      "promptFile": "prompts/connector-4.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 5,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/frames/last-aspen-snowmass.png",
+        "end_image": ".render/frames/first-honda-powersports.png"
+      },
+      "outputFile": ".render/raw/connector-4.mp4",
+      "quotedCredits": 12.5
+    },
+    {
+      "id": "connector-5",
+      "type": "connector",
+      "from": "honda-powersports",
+      "to": "seaworld",
+      "promptFile": "prompts/connector-5.txt",
+      "model": "seedance_2_0_mini",
+      "attributes": {
+        "bitrate_mode": "standard",
+        "generate_audio": false,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "duration": 5,
+        "genre": "auto"
+      },
+      "conditioningInputs": {
+        "start_image": ".render/frames/last-honda-powersports.png",
+        "end_image": ".render/frames/first-seaworld.png"
+      },
+      "outputFile": ".render/raw/connector-5.mp4",
+      "quotedCredits": 12.5
+    }
+  ]
+}
