@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>Verndale connected system</title>
+  <defs>
+    <linearGradient id="cube" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A983FF"/>
+      <stop offset="0.48" stop-color="#6A2FF3"/>
+      <stop offset="1" stop-color="#4010AD"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="35%" cy="25%" r="70%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".68"/>
+      <stop offset=".35" stop-color="#FFFFFF" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="32" stdDeviation="36" flood-color="#4010AD" flood-opacity=".3"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#E1D5FD"/>
+  <ellipse cx="800" cy="470" rx="405" ry="175" fill="none" stroke="#FFB800" stroke-width="24" transform="rotate(-14 800 470)"/>
+  <path d="M1160 351l48 17-39 34z" fill="#FFB800"/>
+  <g filter="url(#shadow)">
+    <rect x="565" y="215" width="470" height="470" rx="104" fill="url(#cube)" transform="rotate(7 800 450)"/>
+    <rect x="588" y="238" width="424" height="424" rx="88" fill="url(#shine)" transform="rotate(7 800 450)"/>
+    <path d="M690 345c48-59 143-86 223-37" fill="none" stroke="#FFFFFF" stroke-opacity=".48" stroke-width="25" stroke-linecap="round"/>
+  </g>
+</svg>
