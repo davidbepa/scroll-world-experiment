@@ -30,7 +30,7 @@ download_result() {
 gen_still() {
   name=$1
   higgsfield generate create gpt_image_2 --prompt "$(cat "$PROMPT_DIR/still-$name.txt")" \
-    --aspect_ratio 3:2 --resolution 2k --quality high --wait --wait-timeout 15m --json \
+    --aspect_ratio 16:9 --resolution 2k --quality high --wait --wait-timeout 15m --json \
     > "$JOB_DIR/still-$name.json" 2> "$JOB_DIR/still-$name.err" && \
   download_result "$JOB_DIR/still-$name.json" "$RAW_DIR/still-$name.png"
 }

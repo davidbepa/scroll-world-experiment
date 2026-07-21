@@ -30,6 +30,12 @@ test('Seedance Mini options match the live Higgsfield CLI schema', async () => {
   assert.doesNotMatch(common, /--mode(?:\s|=)/);
 });
 
+test('still generation uses the approved wide 16:9 frame', async () => {
+  const common = await readFile('scripts/render-common.sh', 'utf8');
+  assert.match(common, /gpt_image_2[\s\S]*--aspect_ratio 16:9/);
+  assert.doesNotMatch(common, /--aspect_ratio 3:2/);
+});
+
 test('render runner exposes every approved noninteractive stage and encoding flag', async () => {
   const runner = await readFile('scripts/render.sh', 'utf8');
   for (const stage of ['calibrate', 'stills', 'contact-sheet', 'dives', 'frames', 'connectors', 'encode', 'verify']) {
