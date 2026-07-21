@@ -1,0 +1,11 @@
+{
+  "name": "verndale-scroll-world",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "python3 -m http.server 4173",
+    "prompts": "node scripts/write-prompts.mjs",
+    "verify:assets": "node scripts/verify-assets.mjs"
+  }
+}

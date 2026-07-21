@@ -1,0 +1,95 @@
+export const CASES = [
+  {
+    id: 'marinemax', label: 'MarineMax',
+    eyebrow: 'Commerce that moves', title: 'Turn inspiration into action.',
+    body: 'We transformed premium boat discovery into a clearer, mobile-first path from browsing to buying.',
+    tags: ['Strategy', 'UX', 'Commerce'], proof: '104% increase in product-detail-page engagement',
+    source: 'https://www.verndale.com/our-work/marinemax',
+    subject: 'A premium digital boat-buying system with a sculptural yacht on a rotating platform, a financing-calculator dial, mobile product-detail panels, comparison modules, and a clear golden customer path connecting discovery to action.',
+    focalPoint: 'the sculptural yacht and golden customer path',
+    still: 'public/assets/stills/marinemax.webp', clip: 'public/assets/video/marinemax.mp4',
+    accent: '#6A2FF3', scroll: 1.5, linger: 0.35,
+  },
+  {
+    id: 'southeast-toyota-finance', label: 'Southeast Toyota Finance',
+    eyebrow: 'Personalization at scale', title: 'Make every next step personal.',
+    body: "A guided digital experience responds to each customer's context, simplifying service and payment journeys.",
+    tags: ['DXP', 'Personalization', 'UX'], proof: '700% increase in seven-day promises to pay',
+    source: 'https://www.verndale.com/our-work/southeast-toyota-finance',
+    subject: 'A refined automotive-finance cockpit with a sculptural vehicle, branching personalized journey tracks, payment milestone modules, customer-profile orbs, and a central DXP decision engine.',
+    focalPoint: 'the central DXP decision engine and personalized route',
+    still: 'public/assets/stills/southeast-toyota-finance.webp', clip: 'public/assets/video/southeast-toyota-finance.mp4',
+    accent: '#FFB800', scroll: 1.25, linger: 0.2,
+  },
+  {
+    id: 'iata', label: 'IATA',
+    eyebrow: 'Complexity, cleared', title: 'Move complexity at global scale.',
+    body: 'A rapid CMS migration unified operations, improved performance, and returned thousands of hours to the team.',
+    tags: ['Optimizely', 'Migration', 'Governance'], proof: 'Approximately 5,000 hours saved',
+    source: 'https://www.verndale.com/our-work/iata',
+    subject: 'A global aviation content hub with a central control tower, orbiting aircraft forms, fragmented content blocks flowing into a clean unified taxonomy, governance gates, and a bright global route network.',
+    focalPoint: 'the central control tower and unified content stream',
+    still: 'public/assets/stills/iata.webp', clip: 'public/assets/video/iata.mp4',
+    accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
+  },
+  {
+    id: 'aspen-snowmass', label: 'Aspen Snowmass',
+    eyebrow: 'Digital as destination', title: 'Make planning feel like arriving.',
+    body: 'An immersive, accessible experience turns trip planning into the first memorable part of the visit.',
+    tags: ['Experience Design', 'Accessibility', 'DXP'], proof: '58% conversion growth',
+    source: 'https://www.verndale.com/our-work/aspen-snowmass',
+    subject: 'A glossy mountain-resort planning system with four stylized peaks, a cable car, lodge and trail modules, immersive media panels, accessible wayfinding, and a golden booking route moving through the landscape.',
+    focalPoint: 'the cable car and golden booking route through the peaks',
+    still: 'public/assets/stills/aspen-snowmass.webp', clip: 'public/assets/video/aspen-snowmass.mp4',
+    accent: '#FFB800', scroll: 1.4, linger: 0.35,
+  },
+  {
+    id: 'honda-powersports', label: 'Honda Powersports',
+    eyebrow: 'Performance by design', title: 'Build for speed. Stay built to scale.',
+    body: 'Platform engineering and integrations gave a global product experience the speed and stability it needed.',
+    tags: ['Performance', 'Sitecore', 'Integrations'], proof: 'Average CPU usage reduced from 30% to 6%',
+    source: 'https://www.verndale.com/fr/our-work/honda-powersports',
+    subject: 'A high-performance product platform with a sculptural motorcycle, responsive device panels, integration conduits, product-data modules, performance gauges, and a rapid golden signal passing through the system.',
+    focalPoint: 'the sculptural motorcycle and connected performance gauges',
+    still: 'public/assets/stills/honda-powersports.webp', clip: 'public/assets/video/honda-powersports.mp4',
+    accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
+  },
+  {
+    id: 'seaworld', label: 'SeaWorld',
+    eyebrow: 'Experiences that evolve', title: 'Make every visit begin online.',
+    body: 'A flexible commerce platform, analytics, and continuous optimization connect inspiration to checkout.',
+    tags: ['Commerce', 'Analytics', 'Optimization'], proof: 'Checkout success improved by 13%',
+    source: 'https://www.verndale.com/our-work/seaworld',
+    subject: 'A polished family theme-park commerce system with a ticket portal, attraction modules, itinerary paths, checkout gates, analytics blocks, and a golden journey connecting inspiration to purchase. No people, no figures, no water features.',
+    focalPoint: 'the ticket portal and connected checkout gates',
+    still: 'public/assets/stills/seaworld.webp', clip: 'public/assets/video/seaworld.mp4',
+    accent: '#FFB800', scroll: 1.7, linger: 0.45,
+    cta: { primary: { label: "Build what's next", href: 'https://www.verndale.com/contact-us' } },
+  },
+];
+
+export const CONNECTORS = Array.from({ length: CASES.length - 1 }, (_, index) =>
+  `public/assets/video/connector-${index + 1}.mp4`
+);
+
+export function createWorldConfig() {
+  return {
+    hero: {
+      eyebrow: 'Connected experiences · measurable growth',
+      title: 'Experience is your growth system.',
+      body: 'We connect strategy, design, technology, data, AI and marketing to create digital experiences that perform.',
+      cta: { label: 'Explore the work', href: '#marinemax' },
+      scroll: 0.65,
+      linger: 0.3,
+    },
+    mobileMode: 'posters',
+    hint: 'scroll to explore',
+    diveScroll: 1.3,
+    connScroll: 0.8,
+    crossfade: 0.08,
+    atmosphere: true,
+    nav: false,
+    sections: CASES.map(scene => ({ ...scene, still: scene.still.replace(/^public\//, ''), clip: scene.clip.replace(/^public\//, '') })),
+    connectors: CONNECTORS.map(path => path.replace(/^public\//, '')),
+  };
+}
