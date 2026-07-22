@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import * as timeline from '../src/timeline.js';
 import {
   buildSegments, heroOpacity, sectionCopyOpacity, lingerEase, activeSectionIndex,
-  segmentLayerOpacities,
+  segmentLayerOpacities, segmentMediaProgress, nextMediaProgress,
+  shouldSnapToSeamEndpoint, sectionPresentationSegment, mediaAtEdge,
+  shouldHoldSeamEndpoint,
 } from '../src/timeline.js';
 
 const sections = [
@@ -102,4 +104,96 @@ test('an after-boundary crossfade holds the outgoing segment through the endpoin
   assert.deepEqual(segmentLayerOpacities(220, blendSegments, 20), [0, 1, 0.5]);
   assert.deepEqual(segmentLayerOpacities(240, blendSegments, 20), [0, 1, 1]);
   assert.deepEqual(segmentLayerOpacities(241, blendSegments, 20), [0, 0, 1]);
+
+  blendSegments[2].transitionComplete = false;
+  assert.deepEqual(segmentLayerOpacities(241, blendSegments, 20), [0, 1, 1]);
+  blendSegments[2].transitionComplete = true;
+  assert.deepEqual(segmentLayerOpacities(241, blendSegments, 20), [0, 0, 1]);
+
+  assert.deepEqual(
+    segmentLayerOpacities(210, blendSegments, 20, () => false),
+    [0, 1, 0],
+  );
+  assert.deepEqual(
+    segmentLayerOpacities(210, blendSegments, 20, () => true),
+    [0, 1, 0.15625],
+  );
+});
+
+test('an after-boundary scene holds frame zero until its crossfade completes', () => {
+  const segment = {
+    start: 200,
+    end: 400,
+    crossfadeIn: 40,
+    crossfadeAfter: true,
+  };
+
+  assert.equal(segmentMediaProgress(200, segment), 0);
+  assert.equal(segmentMediaProgress(220, segment), 0);
+  assert.equal(segmentMediaProgress(240, segment), 0);
+  segment.transitionComplete = false;
+  assert.equal(segmentMediaProgress(280, segment), 0);
+  segment.transitionComplete = true;
+  assert.equal(segmentMediaProgress(280, segment), 0.25);
+  assert.equal(segmentMediaProgress(400, segment), 1);
+});
+
+test('an endpoint handoff bypasses scrub easing so the connector cannot lag', () => {
+  assert.equal(nextMediaProgress(0.8, 1, { snap: true }), 1);
+  assert.ok(Math.abs(nextMediaProgress(0.8, 1) - 0.836) < Number.EPSILON);
+});
+
+test('an after-boundary handoff seeks the outgoing endpoint before blending', () => {
+  const connector = { start: 100, end: 200 };
+  const incoming = {
+    start: 200,
+    end: 400,
+    crossfadeIn: 40,
+    crossfadeAfter: true,
+  };
+
+  assert.equal(shouldSnapToSeamEndpoint(159, connector, incoming, 20), false);
+  assert.equal(shouldSnapToSeamEndpoint(160, connector, incoming, 20), true);
+  assert.equal(shouldSnapToSeamEndpoint(200, connector, incoming, 20), true);
+});
+
+test('a reverse handoff holds the connector endpoint until the scene is hidden', () => {
+  assert.equal(shouldHoldSeamEndpoint({ crossfadeAfter: true, transitionHidden: true }), false);
+  assert.equal(shouldHoldSeamEndpoint({ crossfadeAfter: true, transitionHidden: false }), true);
+  assert.equal(shouldHoldSeamEndpoint({ crossfadeAfter: false, transitionHidden: false }), false);
+});
+
+test('scene copy stays hidden until an after-boundary crossfade completes', () => {
+  const segment = { start: 10.85, end: 12.1 };
+  const presentation = sectionPresentationSegment(segment, {
+    crossfadeIn: 0.16,
+    crossfadeAfter: true,
+  });
+
+  assert.equal(presentation.start, 11.01);
+  assert.equal(sectionCopyOpacity({
+    index: 4,
+    count: 6,
+    position: 10.95,
+    segment: presentation,
+    hasHero: true,
+  }), 0);
+});
+
+test('media edge locking uses decoded frame state rather than scroll target state', () => {
+  const segment = {
+    hasClip: true,
+    ready: true,
+    failed: false,
+    video: { currentTime: 4.1, duration: 5.041667, seeking: false },
+  };
+
+  assert.equal(mediaAtEdge(segment, 'end'), false);
+  segment.video.currentTime = 5.036625;
+  assert.equal(mediaAtEdge(segment, 'end'), true);
+  segment.video.seeking = true;
+  assert.equal(mediaAtEdge(segment, 'end'), false);
+  segment.video.seeking = false;
+  segment.video.currentTime = 0;
+  assert.equal(mediaAtEdge(segment, 'start'), true);
 });

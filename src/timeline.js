@@ -5,7 +5,52 @@ export function smoothstep(value) {
   return x * x * (3 - 2 * x);
 }
 
-export function segmentLayerOpacities(position, segments, crossfade) {
+export function segmentMediaProgress(position, segment) {
+  const hold = segment.crossfadeAfter && Number.isFinite(segment.crossfadeIn)
+    ? Math.max(0, segment.crossfadeIn)
+    : 0;
+  const mediaStart = Math.min(segment.end, segment.start + hold);
+  if (segment.crossfadeAfter && segment.transitionComplete === false && position > mediaStart) {
+    return 0;
+  }
+  const span = segment.end - mediaStart;
+  if (span <= 0) return position >= segment.end ? 1 : 0;
+  return clamp((position - mediaStart) / span);
+}
+
+export function nextMediaProgress(current, target, { reduce = false, snap = false } = {}) {
+  return reduce || snap ? target : current + (target - current) * 0.18;
+}
+
+export function shouldSnapToSeamEndpoint(position, segment, nextSegment, crossfade = 0) {
+  if (!segment || !nextSegment?.crossfadeAfter || segment.end !== nextSegment.start) return false;
+  const band = Number.isFinite(nextSegment.crossfadeIn)
+    ? Math.max(0, nextSegment.crossfadeIn)
+    : Math.max(0, crossfade);
+  return position >= nextSegment.start - band;
+}
+
+export function shouldHoldSeamEndpoint(nextSegment) {
+  return Boolean(nextSegment?.crossfadeAfter && nextSegment.transitionHidden === false);
+}
+
+export function sectionPresentationSegment(segment, section = {}) {
+  if (!section.crossfadeAfter || !Number.isFinite(section.crossfadeIn)) return segment;
+  return {
+    ...segment,
+    start: Math.min(segment.end, segment.start + Math.max(0, section.crossfadeIn)),
+  };
+}
+
+export function mediaAtEdge(segment, edge, tolerance = 0.05) {
+  if (!segment?.hasClip || !segment.ready || segment.failed || !segment.video) return true;
+  const { currentTime, duration, seeking } = segment.video;
+  if (seeking || !Number.isFinite(currentTime) || !Number.isFinite(duration)) return false;
+  const margin = Math.max(tolerance, duration * 0.005);
+  return edge === 'start' ? currentTime <= margin : currentTime >= duration - margin;
+}
+
+export function segmentLayerOpacities(position, segments, crossfade, boundaryReady = () => true) {
   const opacities = Array(segments.length).fill(0);
   if (!segments.length) return opacities;
   const defaultBand = Number.isFinite(crossfade) ? Math.max(0, crossfade) : 0;
@@ -19,7 +64,18 @@ export function segmentLayerOpacities(position, segments, crossfade) {
     const boundary = nextSegment.start;
     const bandStart = nextSegment.crossfadeAfter ? boundary : boundary - band / 2;
     const bandEnd = bandStart + band;
+    if (nextSegment.crossfadeAfter
+      && nextSegment.transitionComplete === false
+      && position > bandEnd) {
+      opacities[index] = 1;
+      opacities[index + 1] = 1;
+      return opacities;
+    }
     if (position < bandStart || position > bandEnd) continue;
+    if (nextSegment.crossfadeAfter && !boundaryReady(index, index + 1)) {
+      opacities[index] = 1;
+      return opacities;
+    }
     const incoming = smoothstep((position - bandStart) / band);
     opacities[index] = 1;
     opacities[index + 1] = incoming;

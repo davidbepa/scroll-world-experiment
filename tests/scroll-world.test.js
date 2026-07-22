@@ -338,6 +338,7 @@ test('after-boundary scene fade keeps the connector alone through its endpoint',
       connectors: ['connector.mp4'],
     });
     const scenes = root.querySelectorAll('.sw-scene');
+    assert.equal(scenes[2].style.transition, 'opacity 160ms linear');
 
     fixture.setScroll(1799);
     fixture.dispatch('resize');

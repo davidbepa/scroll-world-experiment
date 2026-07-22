@@ -14,7 +14,9 @@ The value remains a single world-level setting so all connectors retain a consis
 
 Keep the global crossfade at `0.08` viewport heights. Give the incoming Honda Powersports scene `crossfadeIn: 0.16` and `crossfadeAfter: true` so only the connector 4 → scene 5 boundary uses a `115.2px` post-boundary fade at a 720px viewport. The other nine media boundaries retain their centered `0.08`-viewport bands.
 
-The engine converts the incoming scene override from viewport units during layout and lets the incoming segment select its own blend alignment. Connector 4 receives its entire scroll span and reaches its final frame before scene 5 opacity rises. During the post-boundary fade, connector 4 holds that endpoint fully opaque while scene 5 eases over it, preserving full composited coverage.
+The engine converts the incoming scene override from viewport units during layout and lets the incoming segment select its own blend alignment. During the final `0.16` viewport heights before the boundary, connector 4 bypasses temporal scrub easing and tracks the requested scroll frame directly. At and after the boundary, scene 5 opacity is gated on the connector's decoded final frame and the scene's decoded first frame rather than on scroll targets alone.
+
+Scene 5 holds video frame zero for the full post-boundary fade. Its camera movement and copy begin only after `11.01vh`, when the dissolve has completed. A short `160ms` opacity interpolation prevents a fast wheel gesture from releasing the decoded-frame gate as a one-frame partial dissolve; connector 4 remains fully opaque underneath until that visual interpolation finishes. In reverse, connector 4 stays on its endpoint until scene 5 is fully hidden, then resumes reverse scrubbing.
 
 ## Transition Behavior
 
@@ -24,10 +26,10 @@ No video is re-encoded, trimmed, retimed, or replaced. Each connector continues 
 
 Automated coverage will assert the approved production connector span and run the complete existing test suite. Asset verification will confirm all six scene videos and five connectors remain available and valid.
 
-Desktop browser QA will inspect all ten media boundaries immediately before, within, and immediately after their crossfade bands. Each seam must retain full visual coverage, use the expected adjacent layers, keep copy and overlays hidden during connectors, track scroll position without runtime errors, and show no obvious framing jump between the outgoing and incoming video. Connector 4 → scene 5 must show connector 4 alone through the `10.85vh` boundary, then fade scene 5 in from `10.85vh` through `11.01vh`; adjacent boundaries retain the global centered `0.08` band.
+Desktop browser QA will inspect all ten media boundaries immediately before, within, and immediately after their crossfade bands. Each seam must retain full visual coverage, use the expected adjacent layers, keep copy and overlays hidden during connectors, track scroll position without runtime errors, and show no obvious framing jump between the outgoing and incoming video. Connector 4 → scene 5 must show connector 4 alone until its decoded endpoint is ready, fade only Honda frame zero through `11.01vh`, and keep its copy/backdrop at zero opacity during that dissolve; adjacent boundaries retain the global centered `0.08` band.
 
 Connector playback will also be sampled inside a connector to confirm that its scroll span is `1.2` viewport heights and that video progress advances proportionally across that distance.
 
 ## Scope
 
-This change is desktop-only motion pacing and seam blending. It does not alter mobile poster mode, typography, copy placement, navigation, video files, scene timing, or visual styling.
+This change is desktop-only motion pacing and seam blending. It does not alter mobile poster mode, typography, copy placement, navigation, video files, or the other scene timings. Scene 5 intentionally defers its video and copy start until its post-boundary dissolve completes.

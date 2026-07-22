@@ -9,7 +9,9 @@
 
 import {
   clamp, lingerEase, buildSegments, heroOpacity, sectionCopyOpacity,
-  activeSectionIndex, segmentLayerOpacities,
+  activeSectionIndex, segmentLayerOpacities, segmentMediaProgress, nextMediaProgress,
+  shouldSnapToSeamEndpoint, sectionPresentationSegment, mediaAtEdge,
+  shouldHoldSeamEndpoint,
 } from './timeline.js';
 
 const FALLBACK_STILL = 'public/assets/fallback-system.svg';
@@ -63,6 +65,8 @@ function mountScrollWorld(container, config) {
       w: s.scroll || DIVE_W, linger: s.linger || 0,
       crossfadeInVh: s.crossfadeIn,
       crossfadeAfter: s.crossfadeAfter === true,
+      transitionComplete: s.crossfadeAfter !== true,
+      transitionHidden: true,
     };
     SEGMENTS.push(dive);
     s._seg = dive;
@@ -140,6 +144,16 @@ function mountScrollWorld(container, config) {
   SEGMENTS.forEach((s, index) => {
     const scene = el('div', 'sw-scene');
     scene.style.zIndex = String(100 + index);
+    if (s.crossfadeAfter) {
+      scene.style.transition = 'opacity 160ms linear';
+      listen(scene, 'transitionend', event => {
+        if (event.propertyName !== 'opacity') return;
+        const targetOpacity = Number(scene.style.opacity);
+        if (targetOpacity >= 0.999) s.transitionComplete = true;
+        if (targetOpacity <= 0.001) s.transitionHidden = true;
+        read();
+      });
+    }
     scene.style.setProperty('--sw-accent', s.accent || '');
     const img = el('img', 'sw-scene__still');
     img.alt = '';
@@ -288,7 +302,7 @@ function mountScrollWorld(container, config) {
         listen(video, 'seeked', () => {
           s.painted = true;
           read();
-        }, { once: true });
+        });
         listen(video, 'loadeddata', () => {
           try { video.pause(); } catch (error) { /* no-op */ }
           if (userReady) primeVideo(video);
@@ -305,7 +319,13 @@ function mountScrollWorld(container, config) {
     if (destroyed) return;
     const y = window.scrollY || window.pageYOffset;
     const fade = CROSSFADE * vh;
-    const layerOpacities = segmentLayerOpacities(y, SEGMENTS, fade);
+    const layerOpacities = segmentLayerOpacities(
+      y,
+      SEGMENTS,
+      fade,
+      (outgoingIndex, incomingIndex) => mediaAtEdge(SEGMENTS[outgoingIndex], 'end')
+        && mediaAtEdge(SEGMENTS[incomingIndex], 'start'),
+    );
     let ci = 0;
     for (let i = 0; i < NSEG; i += 1) if (y >= SEGMENTS[i].start) ci = i;
     currentSegmentIndex = ci;
@@ -313,9 +333,15 @@ function mountScrollWorld(container, config) {
     for (let i = 0; i < NSEG; i += 1) {
       const s = SEGMENTS[i];
       if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
-      const local = clamp((y - s.start) / (s.end - s.start));
-      s.target = s.linger ? lingerEase(local, s.linger) : local;
+      const local = segmentMediaProgress(y, s);
+      const holdEndpoint = s.kind === 'conn' && shouldHoldSeamEndpoint(SEGMENTS[i + 1]);
+      const snapToEndpoint = s.kind === 'conn'
+        && shouldSnapToSeamEndpoint(y, s, SEGMENTS[i + 1], fade);
+      s.snapToTarget = holdEndpoint || snapToEndpoint;
+      s.target = holdEndpoint ? 1 : (s.linger ? lingerEase(local, s.linger) : local);
       const opacity = layerOpacities[i];
+      if (s.crossfadeAfter && opacity < 0.999) s.transitionComplete = false;
+      if (s.crossfadeAfter && opacity > 0.001) s.transitionHidden = false;
       const inHeroBand = i === 0 && HERO && y <= s.start;
       s.el.classList.toggle('has-clip', s.painted && !s.failed && !inHeroBand);
       s.el.style.opacity = opacity;
@@ -339,15 +365,19 @@ function mountScrollWorld(container, config) {
       }
     }
     for (let i = 0; i < N; i += 1) {
-      const segment = diveMathSegments[i];
+      const segment = sectionPresentationSegment(diveMathSegments[i], SECTIONS[i]);
       const progress = clamp((position - segment.start) / (segment.end - segment.start));
-      const opacity = sectionCopyOpacity({
-        index: i,
-        count: N,
-        position,
-        segment,
-        hasHero: Boolean(HERO),
-      });
+      const waitingForTransition = SECTIONS[i]._seg?.crossfadeAfter
+        && !SECTIONS[i]._seg.transitionComplete;
+      const opacity = waitingForTransition
+        ? 0
+        : sectionCopyOpacity({
+          index: i,
+          count: N,
+          position,
+          segment,
+          hasHero: Boolean(HERO),
+        });
       const copy = copies[i];
       copy.style.opacity = opacity;
       copy.style.transform = reduce ? 'none' : `translateY(${(0.5 - progress) * 4}vh)`;
@@ -389,7 +419,7 @@ function mountScrollWorld(container, config) {
       if (!s.hasClip || !s.ready || !s.video || s.failed) continue;
       if (s.video.seeking) continue;
       if (!s.visible && Math.abs(s.cur - s.target) < 0.002) continue;
-      s.cur += (s.target - s.cur) * (reduce ? 1 : 0.18);
+      s.cur = nextMediaProgress(s.cur, s.target, { reduce, snap: s.snapToTarget });
       const duration = s.video.duration || 1;
       const targetTime = clamp(s.cur, 0, 0.999) * duration;
       if (Math.abs(s.video.currentTime - targetTime) > epsilon) {
