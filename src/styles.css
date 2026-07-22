@@ -43,8 +43,12 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 }
 .sw-root .sw-topbar { display:none; }
 .sw-root .sw-sky { background:var(--lavender); }
-@media (min-width:861px) {
 .sw-root .sw-copy-backdrop { background:linear-gradient(90deg,var(--lavender) 0%,color-mix(in srgb,var(--lavender) 92%,transparent) 45%,transparent 100%); }
+.sw-root .sw-copy__eyebrow,.sw-root .sw-hero__eyebrow { color:var(--purple); }
+.sw-root .sw-copy__title,.sw-root .sw-hero__title { font-family:"Titillium Web",system-ui,sans-serif; }
+.sw-root .sw-copy__body,.sw-root .sw-hero__body { font-family:"Open Sans",system-ui,sans-serif; }
+.sw-root .sw-btn--primary { background:var(--yellow); color:var(--ink); }
+@media (min-width:861px) {
 .sw-root .sw-copy,.sw-root .sw-hero {
   left:clamp(24px,6vw,88px);
   right:auto;
@@ -59,10 +63,6 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 }
 .sw-root [data-side="right"] .sw-copy__body,.sw-root [data-side="right"] .sw-hero__body { margin-left:auto; }
 .sw-root [data-side="right"] .sw-copy__tags,.sw-root [data-side="right"] .sw-copy__cta { justify-content:flex-end; }
-.sw-root .sw-copy__eyebrow,.sw-root .sw-hero__eyebrow { color:var(--purple); }
-.sw-root .sw-copy__title,.sw-root .sw-hero__title { font-family:"Titillium Web",system-ui,sans-serif; }
-.sw-root .sw-copy__body,.sw-root .sw-hero__body { font-family:"Open Sans",system-ui,sans-serif; }
-.sw-root .sw-btn--primary { background:var(--yellow); color:var(--ink); }
 .sw-root .sw-route { display:none; }
 .sw-root .sw-status {
   display:flex;
@@ -73,7 +73,7 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
   background:color-mix(in srgb,var(--white) 55%,transparent);
   backdrop-filter:blur(10px);
 }
-.sw-root .sw-status__bar i { background:var(--purple); }
-.sw-root .sw-hint { display:none; }
   .site-header { background:linear-gradient(180deg,color-mix(in srgb,var(--lavender) 92%,transparent),transparent); }
 }
+.sw-root .sw-status__bar i { background:var(--purple); }
+.sw-root .sw-hint { display:none; }

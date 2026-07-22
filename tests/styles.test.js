@@ -26,14 +26,13 @@ test('header contact CTA removes only its own text decoration', () => {
   assert.match(styles, /\.site-header a,\.poster-case a\s*\{[^}]*text-decoration-thickness\s*:\s*2px;/);
 });
 
-test('desktop-only film overrides leave the engine mobile poster and status behavior authoritative', () => {
+test('desktop-only film layout preserves global skin and engine mobile behavior', () => {
   const desktopFilm = atRuleBlock(styles, '@media (min-width:861px)');
-  const mobileStyles = styles.replace(`@media (min-width:861px) {${desktopFilm}}`, '');
+  const globalStyles = styles.replace(`@media (min-width:861px) {${desktopFilm}}`, '');
   const engineDesktop = atRuleBlock(engine, '@media(min-width:861px)');
   const engineOutsideDesktop = engine.replace(`@media(min-width:861px){${engineDesktop}}`, '');
   const engineMobile = atRuleBlock(engine, '@media(max-width:860px)');
 
-  assert.match(desktopFilm, /\.sw-root \.sw-copy-backdrop\s*\{[^}]*background\s*:/);
   assert.match(
     desktopFilm,
     /\.sw-root \.sw-copy\[data-side="right"\],\.sw-root \.sw-hero\[data-side="right"\]\s*\{[^}]*left\s*:\s*auto\s*;[^}]*right\s*:\s*clamp\(24px,6vw,88px\)\s*;[^}]*text-align\s*:\s*right\s*;/,
@@ -42,9 +41,23 @@ test('desktop-only film overrides leave the engine mobile poster and status beha
   assert.match(desktopFilm, /\[data-side="right"\] \.sw-copy__tags,[^{]*\[data-side="right"\] \.sw-copy__cta\s*\{[^}]*justify-content\s*:\s*flex-end\s*;/);
   assert.match(desktopFilm, /\.sw-root \.sw-route\s*\{[^}]*display\s*:\s*none\s*;/);
   assert.match(desktopFilm, /\.sw-root \.sw-status\s*\{[^}]*display\s*:\s*flex\s*;/);
-  assert.doesNotMatch(mobileStyles, /\.sw-root \.sw-copy\[data-side="right"\]/);
-  assert.doesNotMatch(mobileStyles, /\.sw-root \[data-side="right"\] \.sw-copy__body/);
-  assert.doesNotMatch(mobileStyles, /\.sw-root \.sw-status\s*\{/);
+  assert.doesNotMatch(globalStyles, /\.sw-root \.sw-copy\[data-side="right"\]/);
+  assert.doesNotMatch(globalStyles, /\.sw-root \[data-side="right"\] \.sw-copy__body/);
+  assert.doesNotMatch(globalStyles, /\.sw-root \.sw-status\s*\{/);
+  assert.match(globalStyles, /\.sw-root \.sw-copy-backdrop\s*\{[^}]*background\s*:/);
+  assert.match(globalStyles, /\.sw-root \.sw-copy__eyebrow,\.sw-root \.sw-hero__eyebrow\s*\{[^}]*color\s*:\s*var\(--purple\)\s*;/);
+  assert.match(globalStyles, /\.sw-root \.sw-copy__title,\.sw-root \.sw-hero__title\s*\{[^}]*font-family\s*:/);
+  assert.match(globalStyles, /\.sw-root \.sw-copy__body,\.sw-root \.sw-hero__body\s*\{[^}]*font-family\s*:/);
+  assert.match(globalStyles, /\.sw-root \.sw-btn--primary\s*\{[^}]*background\s*:\s*var\(--yellow\)\s*;/);
+  assert.match(globalStyles, /\.sw-root \.sw-status__bar i\s*\{[^}]*background\s*:\s*var\(--purple\)\s*;/);
+  assert.match(globalStyles, /\.sw-root \.sw-hint\s*\{[^}]*display\s*:\s*none\s*;/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy-backdrop\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__eyebrow,\.sw-root \.sw-hero__eyebrow\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__title,\.sw-root \.sw-hero__title\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__body,\.sw-root \.sw-hero__body\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-btn--primary\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-status__bar i\s*\{/);
+  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-hint\s*\{/);
   assert.match(engineDesktop, /\.sw-copy\[data-side="right"\],\.sw-hero\[data-side="right"\]\{left:auto;right:clamp\(18px,5vw,64px\);text-align:right;\}/);
   assert.match(engineDesktop, /\.sw-copy\[data-side="right"\] \.sw-copy__body,\.sw-hero\[data-side="right"\] \.sw-hero__body\{margin-left:auto;\}/);
   assert.match(engineDesktop, /\.sw-copy\[data-side="right"\] \.sw-copy__tags,\.sw-copy\[data-side="right"\] \.sw-copy__cta\{justify-content:flex-end;\}/);
