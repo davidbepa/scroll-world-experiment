@@ -21,8 +21,10 @@ function atRuleBlock(css, atRule) {
   assert.fail(`unterminated ${atRule}`);
 }
 
-test('header contact CTA removes only its own text decoration', () => {
+test('header navigation and contact CTA remove their own text decoration', () => {
+  const navRule = styles.match(/\.site-header nav a\s*\{([^}]*)\}/)?.[1] ?? '';
   const contactRule = styles.match(/\.site-header \.site-contact\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(navRule, /text-decoration\s*:\s*none\s*;/);
   assert.match(contactRule, /text-decoration\s*:\s*none\s*;/);
   assert.match(styles, /\.site-header a,\.poster-case a\s*\{[^}]*text-decoration-thickness\s*:\s*2px;/);
 });
