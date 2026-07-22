@@ -229,7 +229,7 @@ test('destroy never removes a pre-existing external sw-css stylesheet', () => {
   }
 });
 
-test('scene layers dissolve complementarily without changing stacking order', () => {
+test('scene layers preserve full coverage without changing stacking order', () => {
   const fixture = createBrowserFixture();
   try {
     const root = fixture.createRoot();
@@ -245,20 +245,39 @@ test('scene layers dissolve complementarily without changing stacking order', ()
     });
     const scenes = root.querySelectorAll('.sw-scene');
     const initialStack = scenes.map(scene => scene.style.zIndex);
+    const coverage = () => {
+      const [lower, upper] = scenes.map(scene => Number(scene.style.opacity));
+      return upper + lower * (1 - upper);
+    };
 
     fixture.setScroll(864);
     fixture.dispatch('resize');
     assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 0]);
+    assert.equal(coverage(), 1);
 
     fixture.setScroll(900);
     fixture.dispatch('resize');
-    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0.5, 0.5]);
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 0.5]);
+    assert.equal(coverage(), 1);
     assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
 
     fixture.setScroll(936);
     fixture.dispatch('resize');
-    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 1]);
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 1]);
+    assert.equal(coverage(), 1);
     assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
+
+    fixture.setScroll(937);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 1]);
+    assert.equal(coverage(), 1);
+    assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
+
+    fixture.setScroll(900);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 0.5]);
+    assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
+
     controller.destroy();
   } finally {
     fixture.restore();

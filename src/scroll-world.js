@@ -9,7 +9,7 @@
 
 import {
   clamp, lingerEase, buildSegments, heroOpacity, sectionCopyOpacity,
-  activeSectionIndex, segmentBlendWeights,
+  activeSectionIndex, segmentLayerOpacities,
 } from './timeline.js';
 
 const FALLBACK_STILL = 'public/assets/fallback-system.svg';
@@ -302,7 +302,7 @@ function mountScrollWorld(container, config) {
     if (destroyed) return;
     const y = window.scrollY || window.pageYOffset;
     const fade = CROSSFADE * vh;
-    const blendWeights = segmentBlendWeights(y, SEGMENTS, fade);
+    const layerOpacities = segmentLayerOpacities(y, SEGMENTS, fade);
     let ci = 0;
     for (let i = 0; i < NSEG; i += 1) if (y >= SEGMENTS[i].start) ci = i;
     currentSegmentIndex = ci;
@@ -312,7 +312,7 @@ function mountScrollWorld(container, config) {
       if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
       const local = clamp((y - s.start) / (s.end - s.start));
       s.target = s.linger ? lingerEase(local, s.linger) : local;
-      const opacity = blendWeights[i];
+      const opacity = layerOpacities[i];
       const inHeroBand = i === 0 && HERO && y <= s.start;
       s.el.classList.toggle('has-clip', s.painted && !s.failed && !inHeroBand);
       s.el.style.opacity = opacity;

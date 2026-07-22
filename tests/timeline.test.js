@@ -41,27 +41,36 @@ test('connector midpoint advances the active route to the incoming case', () => 
   assert.equal(activeSectionIndex(segments[1].start + 0.7, segments, 3), 1);
 });
 
-test('segment blend weights form a complementary smooth dissolve at every seam', () => {
-  assert.equal(typeof timeline.segmentBlendWeights, 'function');
-  const { segmentBlendWeights } = timeline;
+test('segment layer opacities preserve full composited coverage at every seam', () => {
+  assert.equal(typeof timeline.segmentLayerOpacities, 'function');
+  assert.equal('segmentBlendWeights' in timeline, false);
+  const { segmentLayerOpacities } = timeline;
   const blendSegments = [
     { start: 0, end: 100 },
     { start: 100, end: 200 },
     { start: 200, end: 300 },
   ];
+  const coverage = ([lower, upper]) => upper + lower * (1 - upper);
 
-  assert.deepEqual(segmentBlendWeights(89, blendSegments, 20), [1, 0, 0]);
-  assert.deepEqual(segmentBlendWeights(90, blendSegments, 20), [1, 0, 0]);
-  assert.deepEqual(segmentBlendWeights(100, blendSegments, 20), [0.5, 0.5, 0]);
-  assert.deepEqual(segmentBlendWeights(110, blendSegments, 20), [0, 1, 0]);
-  assert.deepEqual(segmentBlendWeights(150, blendSegments, 20), [0, 1, 0]);
-  assert.deepEqual(segmentBlendWeights(200, blendSegments, 20), [0, 0.5, 0.5]);
+  assert.deepEqual(segmentLayerOpacities(89, blendSegments, 20), [1, 0, 0]);
+  assert.deepEqual(segmentLayerOpacities(90, blendSegments, 20), [1, 0, 0]);
+  assert.deepEqual(segmentLayerOpacities(100, blendSegments, 20), [1, 0.5, 0]);
+  assert.deepEqual(segmentLayerOpacities(110, blendSegments, 20), [1, 1, 0]);
+  assert.deepEqual(segmentLayerOpacities(111, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentLayerOpacities(150, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentLayerOpacities(200, blendSegments, 20), [0, 1, 0.5]);
 
-  const quarter = segmentBlendWeights(95, blendSegments, 20);
-  assert.deepEqual(quarter, [0.84375, 0.15625, 0]);
-  assert.equal(quarter[0] + quarter[1], 1);
+  const quarter = segmentLayerOpacities(95, blendSegments, 20);
+  assert.deepEqual(quarter, [1, 0.15625, 0]);
+  assert.equal(coverage(quarter.slice(0, 2)), 1);
 
-  const threeQuarter = segmentBlendWeights(105, blendSegments, 20);
-  assert.deepEqual(threeQuarter, [0.15625, 0.84375, 0]);
-  assert.equal(threeQuarter[0] + threeQuarter[1], 1);
+  const midpoint = segmentLayerOpacities(100, blendSegments, 20);
+  assert.equal(coverage(midpoint.slice(0, 2)), 1);
+
+  const threeQuarter = segmentLayerOpacities(105, blendSegments, 20);
+  assert.deepEqual(threeQuarter, [1, 0.84375, 0]);
+  assert.equal(coverage(threeQuarter.slice(0, 2)), 1);
+
+  const secondMidpoint = segmentLayerOpacities(200, blendSegments, 20);
+  assert.equal(coverage(secondMidpoint.slice(1, 3)), 1);
 });
