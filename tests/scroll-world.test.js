@@ -703,6 +703,7 @@ test('directional copy backdrop follows readable copy and clears connectors', ()
 
     fixture.setScroll(0);
     fixture.dispatch('resize');
+    assert.equal(backdrop.dataset.context, 'hero');
     assert.equal(backdrop.dataset.side, 'right');
     assert.equal(Number(backdrop.style.opacity), 1);
 
@@ -713,6 +714,7 @@ test('directional copy backdrop follows readable copy and clears connectors', ()
 
     fixture.setScroll(900); // center of first dive
     fixture.dispatch('resize');
+    assert.equal(backdrop.dataset.context, 'scene');
     assert.equal(backdrop.dataset.side, 'right');
     assert.equal(Number(backdrop.style.opacity), 1);
 

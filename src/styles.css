@@ -51,6 +51,7 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 .sw-root .sw-btn--primary { background:var(--yellow); color:var(--ink); }
 @media (min-width:861px) {
 .sw-root .sw-copy-backdrop { width:min(76vw,1040px); }
+.sw-root .sw-copy-backdrop[data-context="hero"] { width:min(82vw,1120px); }
 .sw-root .sw-copy,.sw-root .sw-hero {
   left:clamp(24px,6vw,88px);
   right:auto;

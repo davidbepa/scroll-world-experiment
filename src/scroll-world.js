@@ -509,6 +509,7 @@ function mountScrollWorld(container, config) {
     const position = y / vh;
     let backdropOpacity = 0;
     let backdropSide = 'left';
+    let backdropContext = 'scene';
     if (hero) {
       const opacity = heroOpacity(position, HERO_SCROLL);
       hero.style.opacity = opacity;
@@ -516,6 +517,7 @@ function mountScrollWorld(container, config) {
       if (opacity > backdropOpacity) {
         backdropOpacity = opacity;
         backdropSide = hero.dataset.side;
+        backdropContext = 'hero';
       }
     }
     for (let i = 0; i < N; i += 1) {
@@ -539,8 +541,10 @@ function mountScrollWorld(container, config) {
       if (opacity > backdropOpacity) {
         backdropOpacity = opacity;
         backdropSide = copy.dataset.side;
+        backdropContext = 'scene';
       }
     }
+    copyBackdrop.dataset.context = backdropContext;
     copyBackdrop.dataset.side = backdropSide;
     copyBackdrop.style.opacity = backdropOpacity;
 

@@ -32,6 +32,9 @@ test('header navigation and contact CTA remove their own text decoration', () =>
 test('desktop-only film layout preserves global skin and engine mobile behavior', () => {
   const desktopFilm = atRuleBlock(styles, '@media (min-width:861px)');
   const desktopBackdropRule = desktopFilm.match(/\.sw-root \.sw-copy-backdrop\s*\{([^}]*)\}/)?.[1] ?? '';
+  const desktopHeroBackdropRule = desktopFilm.match(
+    /\.sw-root \.sw-copy-backdrop\[data-context="hero"\]\s*\{([^}]*)\}/,
+  )?.[1] ?? '';
   const globalStyles = styles.replace(`@media (min-width:861px) {${desktopFilm}}`, '');
   const engineDesktop = atRuleBlock(engine, '@media(min-width:861px)');
   const engineOutsideDesktop = engine.replace(`@media(min-width:861px){${engineDesktop}}`, '');
@@ -56,6 +59,8 @@ test('desktop-only film layout preserves global skin and engine mobile behavior'
   assert.match(globalStyles, /\.sw-root \.sw-status__bar i\s*\{[^}]*background\s*:\s*var\(--purple\)\s*;/);
   assert.match(globalStyles, /\.sw-root \.sw-hint\s*\{[^}]*display\s*:\s*none\s*;/);
   assert.match(desktopBackdropRule, /width\s*:\s*min\(76vw,1040px\)\s*;/);
+  assert.match(desktopHeroBackdropRule, /width\s*:\s*min\(82vw,1120px\)\s*;/);
+  assert.doesNotMatch(globalStyles, /\.sw-root \.sw-copy-backdrop\[data-context="hero"\]/);
   assert.doesNotMatch(desktopBackdropRule, /background\s*:/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__eyebrow,\.sw-root \.sw-hero__eyebrow\s*\{/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__title,\.sw-root \.sw-hero__title\s*\{/);
