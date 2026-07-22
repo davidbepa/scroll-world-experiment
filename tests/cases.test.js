@@ -58,3 +58,11 @@ test('desktop connectors use the approved slower scroll span', () => {
   assert.equal(config.connScroll, 1.2);
   assert.equal(config.crossfade, 0.08);
 });
+
+test('connector 4 fades into scene 5 over the extended band', () => {
+  const config = createWorldConfig();
+  assert.deepEqual(
+    config.sections.map(({ crossfadeIn }) => crossfadeIn ?? null),
+    [null, null, null, null, 0.16, null],
+  );
+});

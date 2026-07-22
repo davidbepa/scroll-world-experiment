@@ -8,19 +8,22 @@ export function smoothstep(value) {
 export function segmentLayerOpacities(position, segments, crossfade) {
   const opacities = Array(segments.length).fill(0);
   if (!segments.length) return opacities;
-  const band = Number.isFinite(crossfade) ? Math.max(0, crossfade) : 0;
+  const defaultBand = Number.isFinite(crossfade) ? Math.max(0, crossfade) : 0;
 
-  if (band > 0) {
-    for (let index = 0; index < segments.length - 1; index += 1) {
-      const boundary = segments[index + 1].start;
-      const bandStart = boundary - band / 2;
-      const bandEnd = boundary + band / 2;
-      if (position < bandStart || position > bandEnd) continue;
-      const incoming = smoothstep((position - bandStart) / band);
-      opacities[index] = 1;
-      opacities[index + 1] = incoming;
-      return opacities;
-    }
+  for (let index = 0; index < segments.length - 1; index += 1) {
+    const nextSegment = segments[index + 1];
+    const band = Number.isFinite(nextSegment.crossfadeIn)
+      ? Math.max(0, nextSegment.crossfadeIn)
+      : defaultBand;
+    if (band <= 0) continue;
+    const boundary = nextSegment.start;
+    const bandStart = boundary - band / 2;
+    const bandEnd = boundary + band / 2;
+    if (position < bandStart || position > bandEnd) continue;
+    const incoming = smoothstep((position - bandStart) / band);
+    opacities[index] = 1;
+    opacities[index + 1] = incoming;
+    return opacities;
   }
 
   let active = 0;

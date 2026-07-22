@@ -284,6 +284,41 @@ test('scene layers preserve full coverage without changing stacking order', () =
   }
 });
 
+test('incoming scene crossfade override is converted from viewport units', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      crossfade: 0.08,
+      connScroll: 1,
+      sections: [
+        { id: 'one', label: 'One', still: '', clip: '', scroll: 1 },
+        { id: 'two', label: 'Two', still: '', clip: '', scroll: 1, crossfadeIn: 0.16 },
+      ],
+      connectors: ['connector.mp4'],
+    });
+    const scenes = root.querySelectorAll('.sw-scene');
+
+    fixture.setScroll(846); // outside the default 72px first seam band
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 0, 0]);
+
+    fixture.setScroll(1746); // inside the overridden 144px connector-to-scene band
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 1, 0.04296875]);
+
+    fixture.setScroll(1800); // midpoint remains an even incoming blend
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 1, 0.5]);
+
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
 test('directional copy backdrop follows readable copy and clears connectors', () => {
   const fixture = createBrowserFixture();
   try {

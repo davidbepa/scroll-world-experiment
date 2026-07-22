@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as timeline from '../src/timeline.js';
 import {
   buildSegments, heroOpacity, sectionCopyOpacity, lingerEase, activeSectionIndex,
+  segmentLayerOpacities,
 } from '../src/timeline.js';
 
 const sections = [
@@ -73,4 +74,17 @@ test('segment layer opacities preserve full composited coverage at every seam', 
 
   const secondMidpoint = segmentLayerOpacities(200, blendSegments, 20);
   assert.equal(coverage(secondMidpoint.slice(1, 3)), 1);
+});
+
+test('an incoming segment can lengthen only its own crossfade band', () => {
+  const blendSegments = [
+    { start: 0, end: 100 },
+    { start: 100, end: 200 },
+    { start: 200, end: 300, crossfadeIn: 40 },
+  ];
+
+  assert.deepEqual(segmentLayerOpacities(85, blendSegments, 20), [1, 0, 0]);
+  assert.deepEqual(segmentLayerOpacities(100, blendSegments, 20), [1, 0.5, 0]);
+  assert.deepEqual(segmentLayerOpacities(185, blendSegments, 20), [0, 1, 0.04296875]);
+  assert.deepEqual(segmentLayerOpacities(200, blendSegments, 20), [0, 1, 0.5]);
 });

@@ -61,6 +61,7 @@ function mountScrollWorld(container, config) {
       kind: 'dive', si: i, clip: s.clip, clipM: s.clipMobile,
       still: s.still, stillM: s.stillMobile, accent: s.accent,
       w: s.scroll || DIVE_W, linger: s.linger || 0,
+      crossfadeInVh: s.crossfadeIn,
     };
     SEGMENTS.push(dive);
     s._seg = dive;
@@ -224,6 +225,9 @@ function mountScrollWorld(container, config) {
     SEGMENTS.forEach((segment, index) => {
       segment.start = mathSegments[index].start * vh;
       segment.end = mathSegments[index].end * vh;
+      segment.crossfadeIn = Number.isFinite(segment.crossfadeInVh)
+        ? Math.max(0, segment.crossfadeInVh) * vh
+        : undefined;
     });
     totalW = mathSegments.at(-1)?.end || HERO_SCROLL;
     track.style.height = `${totalW * vh + vh}px`;
