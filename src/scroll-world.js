@@ -8,8 +8,8 @@
    ========================================================================== */
 
 import {
-  clamp, smoothstep, lingerEase, buildSegments, heroOpacity,
-  sectionCopyOpacity, activeSectionIndex,
+  clamp, lingerEase, buildSegments, heroOpacity, sectionCopyOpacity,
+  activeSectionIndex, segmentBlendWeights,
 } from './timeline.js';
 
 const FALLBACK_STILL = 'public/assets/fallback-system.svg';
@@ -132,8 +132,9 @@ function mountScrollWorld(container, config) {
   mountedNodes.forEach(node => container.appendChild(node));
 
   // Segment scenes.
-  SEGMENTS.forEach(s => {
+  SEGMENTS.forEach((s, index) => {
     const scene = el('div', 'sw-scene');
+    scene.style.zIndex = String(100 + index);
     scene.style.setProperty('--sw-accent', s.accent || '');
     const img = el('img', 'sw-scene__still');
     img.alt = '';
@@ -296,6 +297,7 @@ function mountScrollWorld(container, config) {
     if (destroyed) return;
     const y = window.scrollY || window.pageYOffset;
     const fade = CROSSFADE * vh;
+    const blendWeights = segmentBlendWeights(y, SEGMENTS, fade);
     let ci = 0;
     for (let i = 0; i < NSEG; i += 1) if (y >= SEGMENTS[i].start) ci = i;
     currentSegmentIndex = ci;
@@ -305,16 +307,11 @@ function mountScrollWorld(container, config) {
       if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
       const local = clamp((y - s.start) / (s.end - s.start));
       s.target = s.linger ? lingerEase(local, s.linger) : local;
-      let outside = 0;
-      if (y < s.start) outside = s.start - y;
-      else if (y > s.end) outside = y - s.end;
-      let opacity = smoothstep(1 - outside / fade);
+      const opacity = blendWeights[i];
       const inHeroBand = i === 0 && HERO && y <= s.start;
-      if (inHeroBand) opacity = 1;
       s.el.classList.toggle('has-clip', s.painted && !s.failed && !inHeroBand);
       s.el.style.opacity = opacity;
       s.visible = opacity > 0.001;
-      s.el.style.zIndex = i === ci ? '120' : String(100 + Math.round(opacity * 10));
       if (!s.hasClip || !s.ready) {
         const scale = reduce ? 1 : 1.03 + local * 0.14;
         s.img.style.transform = `translateX(${stageX - 2}vw) scale(${scale.toFixed(3)})`;

@@ -158,6 +158,13 @@ function createBrowserFixture() {
       body.appendChild(root);
       return root;
     },
+    setScroll(value) {
+      window.scrollY = value;
+      window.pageYOffset = value;
+    },
+    dispatch(type) {
+      for (const handler of listeners.get(type) || []) handler();
+    },
     restore() {
       Object.assign(globalThis, previous);
     },
@@ -217,6 +224,42 @@ test('destroy never removes a pre-existing external sw-css stylesheet', () => {
 
     assert.equal(fixture.document.getElementById('sw-css'), external);
     assert.equal(external.textContent, '/* external */');
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('scene layers dissolve complementarily without changing stacking order', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      crossfade: 0.08,
+      sections: [
+        { id: 'one', label: 'One', still: '', clip: '', scroll: 1 },
+        { id: 'two', label: 'Two', still: '', clip: '', scroll: 1 },
+      ],
+      connectors: [null],
+    });
+    const scenes = root.querySelectorAll('.sw-scene');
+    const initialStack = scenes.map(scene => scene.style.zIndex);
+
+    fixture.setScroll(864);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [1, 0]);
+
+    fixture.setScroll(900);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0.5, 0.5]);
+    assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
+
+    fixture.setScroll(936);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 1]);
+    assert.deepEqual(scenes.map(scene => scene.style.zIndex), initialStack);
+    controller.destroy();
   } finally {
     fixture.restore();
   }

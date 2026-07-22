@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as timeline from '../src/timeline.js';
 import {
   buildSegments, heroOpacity, sectionCopyOpacity, lingerEase, activeSectionIndex,
 } from '../src/timeline.js';
@@ -38,4 +39,29 @@ test('connector midpoint advances the active route to the incoming case', () => 
   const segments = buildSegments({ sections, connectors, diveScroll: 1.3, connScroll: 0.8, heroScroll: 0.65 });
   assert.equal(activeSectionIndex(segments[1].start + 0.1, segments, 3), 0);
   assert.equal(activeSectionIndex(segments[1].start + 0.7, segments, 3), 1);
+});
+
+test('segment blend weights form a complementary smooth dissolve at every seam', () => {
+  assert.equal(typeof timeline.segmentBlendWeights, 'function');
+  const { segmentBlendWeights } = timeline;
+  const blendSegments = [
+    { start: 0, end: 100 },
+    { start: 100, end: 200 },
+    { start: 200, end: 300 },
+  ];
+
+  assert.deepEqual(segmentBlendWeights(89, blendSegments, 20), [1, 0, 0]);
+  assert.deepEqual(segmentBlendWeights(90, blendSegments, 20), [1, 0, 0]);
+  assert.deepEqual(segmentBlendWeights(100, blendSegments, 20), [0.5, 0.5, 0]);
+  assert.deepEqual(segmentBlendWeights(110, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentBlendWeights(150, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentBlendWeights(200, blendSegments, 20), [0, 0.5, 0.5]);
+
+  const quarter = segmentBlendWeights(95, blendSegments, 20);
+  assert.deepEqual(quarter, [0.84375, 0.15625, 0]);
+  assert.equal(quarter[0] + quarter[1], 1);
+
+  const threeQuarter = segmentBlendWeights(105, blendSegments, 20);
+  assert.deepEqual(threeQuarter, [0.15625, 0.84375, 0]);
+  assert.equal(threeQuarter[0] + threeQuarter[1], 1);
 });

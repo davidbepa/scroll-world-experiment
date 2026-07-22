@@ -5,6 +5,32 @@ export function smoothstep(value) {
   return x * x * (3 - 2 * x);
 }
 
+export function segmentBlendWeights(position, segments, crossfade) {
+  const weights = Array(segments.length).fill(0);
+  if (!segments.length) return weights;
+  const band = Number.isFinite(crossfade) ? Math.max(0, crossfade) : 0;
+
+  if (band > 0) {
+    for (let index = 0; index < segments.length - 1; index += 1) {
+      const boundary = segments[index + 1].start;
+      const bandStart = boundary - band / 2;
+      const bandEnd = boundary + band / 2;
+      if (position < bandStart || position > bandEnd) continue;
+      const incoming = smoothstep((position - bandStart) / band);
+      weights[index] = 1 - incoming;
+      weights[index + 1] = incoming;
+      return weights;
+    }
+  }
+
+  let active = 0;
+  for (let index = 1; index < segments.length; index += 1) {
+    if (position >= segments[index].start) active = index;
+  }
+  weights[active] = 1;
+  return weights;
+}
+
 export function lingerEase(value, linger = 0) {
   const x = clamp(value);
   const amount = clamp(linger);
