@@ -79,7 +79,7 @@ const jobs = [...stillJobs, ...diveJobs, ...connectorJobs];
 const manifest = {
   name: PACK_NAME,
   schemaSnapshot: { date: '2026-07-21', higgsfieldCliVersion: '1.1.19' },
-  direction: 'Photorealistic premium commercial-film realism across six connected, human-scale environments.',
+  direction: 'Photorealistic premium commercial-film realism across six connected, human-scale featured-client environments with authentic identity limited to physically integrated signage, venues, vehicles, and products.',
   costs: {
     currency: 'credits',
     stills: 42,
@@ -111,11 +111,11 @@ function returnFileList() {
 function readmeText() {
   return `# ${PACK_NAME}
 
-This pack is the complete, standalone production handoff for Verndale's six-scene photorealistic cinematic scroll experience. The earlier glossy miniature/toy direction is superseded. The existing glossy MarineMax WebP in the project is temporary calibration output, is not approved art, and must be replaced by the new photorealistic still.
+This pack is the reproducible production handoff for Verndale's six-scene photorealistic cinematic scroll experience. The approved desktop assets are already integrated; retain this pack as the exact recipe for any separately authorized future rerender. The earlier glossy miniature/toy direction remains superseded.
 
 ## Direction
 
-Create premium commercial-film realism: believable human-scale locations; real glass, metal, stone, wood, water, snow, and landscape materials; late-afternoon golden hour progressing toward blue hour; physically plausible violet practical lights; one restrained amber-gold signal path; subtle anamorphic bloom, volumetric atmosphere, natural large-format perspective, and fine film grain. Use a wide 16:9 composition. Do not introduce toy scale, molded plastic, illustration, floating UI, text, logos, watermarks, cuts, morphing, or changing geometry.
+Create premium commercial-film realism: believable human-scale locations; real glass, metal, stone, wood, water, snow, and landscape materials; late-afternoon golden hour progressing toward blue hour; physically plausible violet practical lights; one restrained amber-gold signal path; subtle anamorphic bloom, volumetric atmosphere, natural large-format perspective, and fine film grain. Use a wide 16:9 composition. Featured-client identity may appear only where it belongs physically in architectural signage, venue identity, or a product or vehicle marque. No captions, typographic overlays, synthetic labels, promotional copy, watermarks, unrelated logos, or unrelated brand marks are permitted. Do not introduce toy scale, molded plastic, illustration, floating UI, cuts, morphing, or changing geometry.
 
 The prompt files in \`prompts/\` are UTF-8 and are the source text to paste unchanged. \`generation-manifest.json\` is the machine-readable version of every setting, dependency, filename, and quoted cost below.
 
@@ -256,7 +256,8 @@ Before accepting a still or clip, confirm:
 - The violet accents behave like real practical lighting; the amber-gold path is subtle and integrated into architecture or paving.
 - Lighting progresses coherently from golden hour to blue hour across the six-case sequence.
 - The 16:9 frame preserves useful negative space for page copy and keeps the focal subject readable.
-- There is no text, signage, logo, watermark, synthetic UI, or accidental brand mark. SeaWorld has no people or figures.
+- Featured-client identity appears only as physically integrated architectural signage, venue identity, or a product or vehicle marque for the named case.
+- There are no captions, typographic overlays, synthetic labels, promotional copy, watermarks, unrelated logos, unrelated brand marks, or synthetic UI. SeaWorld has no people or figures.
 - Every dive starts on its exact still, uses one smooth forward descent, preserves scene geometry, and contains no cut, morph, pop-in, or disappearance.
 - Every connector starts on the prior dive's actual last frame, ends on the next dive's actual first frame, and maintains one physically continuous move without a cut or geometry change.
 - Videos are silent 720p 16:9 and have the requested duration. Keep the original downloaded files; do not pre-encode them.

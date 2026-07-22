@@ -167,5 +167,13 @@ test('standalone README contains the safe manual generation workflow', async () 
   assert.match(readme, /do not batch/i);
   assert.match(readme, /superseded/i);
   assert.match(readme, /17 raw files/i);
+  assert.match(
+    readme,
+    /featured-client identity.*architectural signage.*venue identity.*product or vehicle marque/is,
+  );
+  assert.match(
+    readme,
+    /no captions.*typographic overlays.*synthetic labels.*watermarks.*unrelated logos/is,
+  );
   assert.doesNotMatch(readme, /run-all\.sh|generate-all\.sh/);
 });

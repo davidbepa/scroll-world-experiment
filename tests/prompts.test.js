@@ -24,7 +24,7 @@ test('all stills start with the byte-identical photorealistic cinematic style', 
   for (const scene of CASES) assert.ok(buildStillPrompt(scene).startsWith(STYLE_PREAMBLE));
 });
 
-test('all prompts reject the superseded toy direction and visible typography', () => {
+test('all prompts allow physical featured-client identity but reject synthetic branding', () => {
   const prompts = [
     ...CASES.flatMap(scene => [buildStillPrompt(scene), buildDivePrompt(scene)]),
     ...CASES.slice(0, -1).map((scene, index) => buildConnectorPrompt(scene, CASES[index + 1])),
@@ -32,9 +32,16 @@ test('all prompts reject the superseded toy direction and visible typography', (
 
   for (const prompt of prompts) {
     assert.doesNotMatch(prompt, /glossy systems|vinyl-toy|toy diorama|plastic diorama|collectible model/i);
-    assert.match(prompt, /no (?:visible )?text/i);
-    assert.match(prompt, /no logos/i);
-    assert.match(prompt, /no watermarks/i);
+    assert.match(prompt, /featured client's real identity/i);
+    assert.match(prompt, /architectural signage/i);
+    assert.match(prompt, /venue identity/i);
+    assert.match(prompt, /product or vehicle marque/i);
+    assert.match(prompt, /do not add captions/i);
+    assert.match(prompt, /typographic overlays/i);
+    assert.match(prompt, /synthetic labels/i);
+    assert.match(prompt, /watermarks/i);
+    assert.match(prompt, /unrelated logos/i);
+    assert.match(prompt, /unrelated brand marks/i);
   }
 });
 
@@ -65,10 +72,16 @@ test('connectors match exact boundary frames through one physical environment', 
 test('case subjects describe recognizable real-world environments', () => {
   const subjects = Object.fromEntries(CASES.map(scene => [scene.id, scene.subject.toLowerCase()]));
   assert.match(subjects.marinemax, /real marina.*yacht.*commerce pavilion/);
-  assert.match(subjects['southeast-toyota-finance'], /automotive-finance experience center/);
-  assert.match(subjects.iata, /airport.*global-operations content hub/);
+  assert.match(
+    subjects['southeast-toyota-finance'],
+    /southeast toyota finance.*toyota vehicle.*client identity/,
+  );
+  assert.match(subjects.iata, /iata international airport.*client identity/);
   assert.match(subjects['aspen-snowmass'], /real aspen alpine resort/);
-  assert.match(subjects['honda-powersports'], /performance engineering lab.*racetrack.*motorcycle/);
+  assert.match(
+    subjects['honda-powersports'],
+    /honda powersports.*honda motorcycle.*client identity/,
+  );
   assert.match(subjects.seaworld, /theme-park arrival.*commerce environment/);
 });
 
