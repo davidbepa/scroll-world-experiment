@@ -5,7 +5,7 @@ import {
   buildSegments, heroOpacity, sectionCopyOpacity, lingerEase, activeSectionIndex,
   segmentLayerOpacities, segmentMediaProgress, nextMediaProgress,
   shouldSnapToSeamEndpoint, sectionPresentationSegment, mediaAtEdge,
-  shouldHoldSeamEndpoint,
+  shouldHoldSeamEndpoint, isSegmentPlayable, reachableSegmentIndex,
 } from '../src/timeline.js';
 
 const sections = [
@@ -42,6 +42,28 @@ test('connector midpoint advances the active route to the incoming case', () => 
   const segments = buildSegments({ sections, connectors, diveScroll: 1.3, connScroll: 0.8, heroScroll: 0.65 });
   assert.equal(activeSectionIndex(segments[1].start + 0.1, segments, 3), 0);
   assert.equal(activeSectionIndex(segments[1].start + 0.7, segments, 3), 1);
+});
+
+test('configured video is playable only after metadata and a frame are ready', () => {
+  assert.equal(isSegmentPlayable({ clip: 'scene.mp4', ready: false, painted: false }), false);
+  assert.equal(isSegmentPlayable({ clip: 'scene.mp4', ready: true, painted: false }), false);
+  assert.equal(isSegmentPlayable({ clip: 'scene.mp4', ready: true, painted: true }), true);
+  assert.equal(isSegmentPlayable({ clip: 'scene.mp4', failed: true }), true);
+  assert.equal(isSegmentPlayable({ clip: null }), true);
+});
+
+test('reachability stops at the first unplayable segment in either direction', () => {
+  const chain = [
+    { clip: '0.mp4', ready: true, painted: true },
+    { clip: '1.mp4', ready: true, painted: true },
+    { clip: '2.mp4', ready: false, painted: false },
+    { clip: '3.mp4', ready: true, painted: true },
+  ];
+  assert.equal(reachableSegmentIndex(1, 3, chain), 1);
+  assert.equal(reachableSegmentIndex(3, 0, chain), 3);
+  chain[2].failed = true;
+  assert.equal(reachableSegmentIndex(1, 3, chain), 3);
+  assert.equal(reachableSegmentIndex(3, 0, chain), 0);
 });
 
 test('segment layer opacities preserve full composited coverage at every seam', () => {

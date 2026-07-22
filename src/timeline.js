@@ -5,6 +5,30 @@ export function smoothstep(value) {
   return x * x * (3 - 2 * x);
 }
 
+export function isSegmentPlayable(segment) {
+  return Boolean(
+    !segment?.clip
+      || segment.failed
+      || (segment.ready && segment.painted),
+  );
+}
+
+export function reachableSegmentIndex(currentIndex, requestedIndex, segments) {
+  if (!segments.length) return 0;
+  const current = clamp(currentIndex, 0, segments.length - 1);
+  const requested = clamp(requestedIndex, 0, segments.length - 1);
+  const direction = Math.sign(requested - current);
+  if (!direction) return current;
+  let reachable = current;
+  for (let index = current + direction;
+    direction > 0 ? index <= requested : index >= requested;
+    index += direction) {
+    if (!isSegmentPlayable(segments[index])) break;
+    reachable = index;
+  }
+  return reachable;
+}
+
 export function segmentMediaProgress(position, segment) {
   const hold = segment.crossfadeAfter && Number.isFinite(segment.crossfadeIn)
     ? Math.max(0, segment.crossfadeIn)
