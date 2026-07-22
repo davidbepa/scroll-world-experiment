@@ -44,12 +44,13 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 }
 .sw-root .sw-topbar { display:none; }
 .sw-root .sw-sky { background:var(--lavender); }
-.sw-root .sw-copy-backdrop { background:linear-gradient(90deg,color-mix(in srgb,var(--lavender) 96%,transparent) 0%,color-mix(in srgb,var(--lavender) 80%,transparent) 28%,color-mix(in srgb,var(--lavender) 38%,transparent) 56%,transparent 78%); }
+.sw-root .sw-copy-backdrop { background:linear-gradient(90deg,color-mix(in srgb,var(--white) 96%,transparent) 0%,color-mix(in srgb,var(--white) 80%,transparent) 28%,color-mix(in srgb,var(--white) 38%,transparent) 56%,transparent 78%); }
 .sw-root .sw-copy__eyebrow,.sw-root .sw-hero__eyebrow { color:var(--purple); }
 .sw-root .sw-copy__title,.sw-root .sw-hero__title { font-family:"Titillium Web",system-ui,sans-serif; }
 .sw-root .sw-copy__body,.sw-root .sw-hero__body { font-family:"Open Sans",system-ui,sans-serif; }
 .sw-root .sw-btn--primary { background:var(--yellow); color:var(--ink); }
 @media (min-width:861px) {
+.sw-root .sw-copy-backdrop { width:min(76vw,1040px); }
 .sw-root .sw-copy,.sw-root .sw-hero {
   left:clamp(24px,6vw,88px);
   right:auto;

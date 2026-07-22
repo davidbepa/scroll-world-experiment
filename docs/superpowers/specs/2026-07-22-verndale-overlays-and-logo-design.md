@@ -2,23 +2,23 @@
 
 ## Goal
 
-Make the scene copy backdrop read as an intentional directional gradient, change the desktop header wash from lavender to white, and replace the generated header mark/text with the supplied official Verndale SVG wordmark.
+Make the scene copy backdrop read as a wide white directional gradient, change the desktop header wash from lavender to white, and replace the generated header mark/text with the supplied official Verndale SVG wordmark.
 
 ## Scene Copy Gradient
 
-Keep the single `.sw-copy-backdrop` layer and its existing left/right direction switching. Replace the nearly solid lavender wash with a visibly progressive lavender-to-transparent gradient:
+Keep the single `.sw-copy-backdrop` layer and its existing left/right direction switching. Use a visibly progressive white-to-transparent gradient:
 
 ```css
 linear-gradient(
   90deg,
-  color-mix(in srgb, var(--lavender) 96%, transparent) 0%,
-  color-mix(in srgb, var(--lavender) 80%, transparent) 28%,
-  color-mix(in srgb, var(--lavender) 38%, transparent) 56%,
+  color-mix(in srgb, var(--white) 96%, transparent) 0%,
+  color-mix(in srgb, var(--white) 80%, transparent) 28%,
+  color-mix(in srgb, var(--white) 38%, transparent) 56%,
   transparent 78%
 )
 ```
 
-The backdrop still flips horizontally when copy is on the right. Its size, opacity animation, copy timing, and connector clearing remain unchanged. Mobile keeps the engine’s existing bottom-up gradient.
+The backdrop still flips horizontally when copy is on the right. On desktop, widen it from the engine default to `min(76vw, 1040px)`. Its opacity animation, copy timing, and connector clearing remain unchanged. Mobile keeps the engine’s existing bottom-up sizing.
 
 ## Header Gradient
 
@@ -45,7 +45,7 @@ Render the logo with intrinsic proportions at `width: clamp(142px, 12.5vw, 180px
 
 ## Verification
 
-Add stylesheet tests that lock the four-stop lavender scene gradient, the three-stop white header gradient, and the absence of lavender/purple in the desktop header rule. Add markup/asset assertions for the official logo path, accessible link, and removal of the generated mark.
+Add stylesheet tests that lock the four-stop white scene gradient, the desktop-only `min(76vw, 1040px)` backdrop width, the three-stop white header gradient, and the absence of lavender/purple in both gradient rules. Add markup/asset assertions for the official logo path, accessible link, and removal of the generated mark.
 
 Run the complete test and asset suites. In a 1280×720 browser, inspect left- and right-aligned copy scenes, the initial header, logo proportions, link accessibility, connector overlay clearing, and current-origin console diagnostics.
 

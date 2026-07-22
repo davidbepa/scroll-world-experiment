@@ -31,6 +31,7 @@ test('header navigation and contact CTA remove their own text decoration', () =>
 
 test('desktop-only film layout preserves global skin and engine mobile behavior', () => {
   const desktopFilm = atRuleBlock(styles, '@media (min-width:861px)');
+  const desktopBackdropRule = desktopFilm.match(/\.sw-root \.sw-copy-backdrop\s*\{([^}]*)\}/)?.[1] ?? '';
   const globalStyles = styles.replace(`@media (min-width:861px) {${desktopFilm}}`, '');
   const engineDesktop = atRuleBlock(engine, '@media(min-width:861px)');
   const engineOutsideDesktop = engine.replace(`@media(min-width:861px){${engineDesktop}}`, '');
@@ -54,7 +55,8 @@ test('desktop-only film layout preserves global skin and engine mobile behavior'
   assert.match(globalStyles, /\.sw-root \.sw-btn--primary\s*\{[^}]*background\s*:\s*var\(--yellow\)\s*;/);
   assert.match(globalStyles, /\.sw-root \.sw-status__bar i\s*\{[^}]*background\s*:\s*var\(--purple\)\s*;/);
   assert.match(globalStyles, /\.sw-root \.sw-hint\s*\{[^}]*display\s*:\s*none\s*;/);
-  assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy-backdrop\s*\{/);
+  assert.match(desktopBackdropRule, /width\s*:\s*min\(76vw,1040px\)\s*;/);
+  assert.doesNotMatch(desktopBackdropRule, /background\s*:/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__eyebrow,\.sw-root \.sw-hero__eyebrow\s*\{/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__title,\.sw-root \.sw-hero__title\s*\{/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copy__body,\.sw-root \.sw-hero__body\s*\{/);
@@ -79,12 +81,13 @@ test('scene copy overlay and desktop header use the approved gradients', () => {
 
   assert.match(
     backdropRule,
-    /background:linear-gradient\(90deg,color-mix\(in srgb,var\(--lavender\) 96%,transparent\) 0%,color-mix\(in srgb,var\(--lavender\) 80%,transparent\) 28%,color-mix\(in srgb,var\(--lavender\) 38%,transparent\) 56%,transparent 78%\);/,
+    /background:linear-gradient\(90deg,color-mix\(in srgb,var\(--white\) 96%,transparent\) 0%,color-mix\(in srgb,var\(--white\) 80%,transparent\) 28%,color-mix\(in srgb,var\(--white\) 38%,transparent\) 56%,transparent 78%\);/,
   );
   assert.match(
     headerRule,
     /background:linear-gradient\(180deg,color-mix\(in srgb,var\(--white\) 96%,transparent\) 0%,color-mix\(in srgb,var\(--white\) 76%,transparent\) 55%,transparent 100%\);/,
   );
+  assert.doesNotMatch(backdropRule, /var\(--(?:lavender|purple)\)/);
   assert.doesNotMatch(headerRule, /var\(--(?:lavender|purple)\)/);
 });
 
