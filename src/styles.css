@@ -18,7 +18,7 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 .eyebrow { color:var(--purple); font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
 .primary-cta { display:inline-block; margin-top:20px; padding:13px 22px; border-radius:999px; background:var(--yellow); color:var(--ink); font-weight:700; }
 .site-header a,.poster-case a { color:inherit; text-decoration-thickness:2px; text-underline-offset:4px; }
-.site-header .site-contact { color:var(--white); }
+.site-header .site-contact { color:var(--white); text-decoration:none; }
 .site-brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.08em; text-decoration:none; }
 .site-brand span { width:18px; height:18px; border-radius:5px; background:var(--purple); box-shadow:7px 7px 0 var(--yellow); }
 .poster-hero h1 { max-width:720px; margin:.15em 0; font-size:clamp(3rem,8vw,7rem); line-height:.9; }
