@@ -105,7 +105,7 @@ class FakeElement {
   }
 }
 
-function createBrowserFixture() {
+function createBrowserFixture({ reduceMotion = true } = {}) {
   const head = new FakeElement('head');
   const body = new FakeElement('body');
   const document = {
@@ -129,7 +129,7 @@ function createBrowserFixture() {
     innerWidth: 1440,
     scrollY: 0,
     pageYOffset: 0,
-    matchMedia: query => ({ matches: query.includes('prefers-reduced-motion') }),
+    matchMedia: query => ({ matches: reduceMotion && query.includes('prefers-reduced-motion') }),
     addEventListener(type, handler) {
       const handlers = listeners.get(type) || new Set();
       handlers.add(handler);
@@ -337,6 +337,21 @@ test('directional copy backdrop follows readable copy and clears connectors', ()
     assert.equal(backdrop.dataset.side, 'left');
     assert.equal(Number(backdrop.style.opacity), 1);
 
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('still posters remain centered and full bleed while retaining fallback zoom', () => {
+  const fixture = createBrowserFixture({ reduceMotion: false });
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, config());
+    const [still] = root.querySelectorAll('.sw-scene__still');
+
+    assert.equal(still.style.transform, 'scale(1.030)');
+    assert.doesNotMatch(still.style.transform, /translateX/);
     controller.destroy();
   } finally {
     fixture.restore();

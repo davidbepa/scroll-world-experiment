@@ -211,7 +211,6 @@ function mountScrollWorld(container, config) {
   });
 
   let vh = window.innerHeight;
-  let stageX = 0;
   let totalW = 0;
   let activeIndex = -1;
   let currentSegmentIndex = 0;
@@ -222,7 +221,6 @@ function mountScrollWorld(container, config) {
     if (destroyed) return;
     vh = window.innerHeight;
     laidOutW = window.innerWidth;
-    stageX = window.innerWidth > 860 ? 4 : 0;
     SEGMENTS.forEach((segment, index) => {
       segment.start = mathSegments[index].start * vh;
       segment.end = mathSegments[index].end * vh;
@@ -319,7 +317,7 @@ function mountScrollWorld(container, config) {
       s.visible = opacity > 0.001;
       if (!s.hasClip || !s.ready) {
         const scale = reduce ? 1 : 1.03 + local * 0.14;
-        s.img.style.transform = `translateX(${stageX - 2}vw) scale(${scale.toFixed(3)})`;
+        s.img.style.transform = `scale(${scale.toFixed(3)})`;
       }
     }
 
