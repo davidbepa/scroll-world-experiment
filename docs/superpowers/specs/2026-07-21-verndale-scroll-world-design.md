@@ -1,7 +1,7 @@
 # Verndale Scroll-World Landing Page Design
 
 Date: 2026-07-21  
-Status: Approved photorealistic revision; generation handoff in progress
+Status: Approved photorealistic production direction; generated media integrated
 
 ## 1. Objective
 
@@ -32,11 +32,11 @@ These values reflect Verndale's current public site. Yellow carries the connecti
 
 Each client becomes a believable, human-scale location filmed with premium commercial-film realism. Real architecture, vehicles, equipment, and landscapes make the work immediately recognizable. Physically plausible electric-violet practicals connect the locations to Verndale's identity, while a restrained amber-gold path is integrated into paving, rails, and architectural lighting to guide the flight from golden hour into blue hour.
 
-The following style preamble must be copied byte-for-byte into every scene-still prompt:
+The following style preamble is the source contract for every scene-still prompt:
 
-> Photorealistic premium commercial film frame of a believable human-scale environment, composed as a wide 16:9 view captured with a large-format camera and natural cinematic perspective. Real glass, brushed metal, stone, wood, water, snow, and landscape materials as appropriate to the location, with physically accurate reflections, surface wear, and atmospheric depth. Golden hour progressing naturally toward blue hour across the connected journey. Physically plausible electric-violet practical lighting accents the architecture while a restrained amber-gold signal path is integrated into real paving, rails, or architectural light. Subtle anamorphic bloom, volumetric haze, realistic shadow falloff, fine film grain, premium location photography, generous negative space for editorial copy. No miniature-scale staging, molded-polymer surfaces, product-toy aesthetics, illustration, or floating synthetic UI. No visible text, letters, numbers, captions, or signage. No logos. No watermarks.
+> Photorealistic premium commercial film frame of a believable human-scale environment, composed as a wide 16:9 view captured with a large-format camera and natural cinematic perspective. Real glass, brushed metal, stone, wood, water, snow, and landscape materials as appropriate to the location, with physically accurate reflections, surface wear, and atmospheric depth. Golden hour progressing naturally toward blue hour across the connected journey. Physically plausible electric-violet practical lighting accents the architecture while a restrained amber-gold signal path is integrated into real paving, rails, or architectural light. Subtle anamorphic bloom, volumetric haze, realistic shadow falloff, fine film grain, premium location photography, generous negative space for editorial copy. No miniature-scale staging, molded-polymer surfaces, product-toy aesthetics, illustration, or floating synthetic UI. The featured client's real identity may appear only where it belongs physically in the photographed environment: architectural signage, venue identity, or a product or vehicle marque. Do not add captions, typographic overlays, synthetic labels, promotional copy, watermarks, unrelated logos, or unrelated brand marks.
 
-Every still uses a wide 16:9 large-format composition. The camera height, lens language, material response, restrained bloom, and evolving time of day must remain coherent across all six locations. The imagery must not contain floating interface panels or fabricated typography.
+Every still uses a wide 16:9 large-format composition. The camera height, lens language, material response, restrained bloom, and evolving time of day must remain coherent across all six locations. The imagery must not contain floating interface panels or fabricated typography. Recognizable MarineMax, Southeast Toyota Finance/Toyota, IATA, Aspen Snowmass, Honda Powersports/Honda, and SeaWorld identity is intentional case-study context, not interface copy. Existing approved footage with those photographed marks remains in scope and does not require rerendering.
 
 ## 3. Narrative and Copy
 
@@ -63,7 +63,7 @@ The first rendered scene doubles as the visual hero, but the hero has its own sh
 ### Scene 2 — Southeast Toyota Finance
 
 - Label: Southeast Toyota Finance
-- Subject: A real automotive-finance experience center at late golden hour, with an unbranded full-scale vehicle beneath a steel-and-glass canopy, private consultation bays, service lanes, and an amber-gold route branching naturally through the architecture.
+- Subject: A real Southeast Toyota Finance experience center at late golden hour, with a full-scale Toyota vehicle beneath a steel-and-glass canopy, restrained environmental client identity, private consultation bays, service lanes, and an amber-gold route branching naturally through the architecture.
 - Eyebrow: Personalization at scale
 - Title: Make every next step personal.
 - Body: A guided digital experience responds to each customer's context, simplifying service and payment journeys.
@@ -74,7 +74,7 @@ The first rendered scene doubles as the visual hero, but the hero has its own sh
 ### Scene 3 — IATA
 
 - Label: IATA
-- Subject: A real international airport and global-operations content hub at dusk, with a glass operations center overlooking active gates, unbranded aircraft on the apron, connected editorial workspaces, and an amber-gold path running from the concourse into the control room.
+- Subject: A real IATA international airport and global-operations content hub at dusk, with a glass operations center overlooking active gates, aircraft on the apron, restrained environmental client identity, connected editorial workspaces, and an amber-gold path running from the concourse into the control room.
 - Eyebrow: Complexity, cleared
 - Title: Move complexity at global scale.
 - Body: A rapid CMS migration unified operations, improved performance, and returned thousands of hours to the team.
@@ -96,7 +96,7 @@ The first rendered scene doubles as the visual hero, but the hero has its own sh
 ### Scene 5 — Honda Powersports
 
 - Label: Honda Powersports
-- Subject: A real performance engineering lab opening directly onto a floodlit racetrack at blue hour, with a full-scale unbranded motorcycle on a service stand, metal test equipment, glass workshop partitions, and an amber-gold line continuing onto the circuit.
+- Subject: A real Honda Powersports performance engineering lab opening directly onto a floodlit racetrack at blue hour, with a full-scale Honda motorcycle on a service stand, restrained environmental client identity, metal test equipment, glass workshop partitions, and an amber-gold line continuing onto the circuit.
 - Eyebrow: Performance by design
 - Title: Build for speed. Stay built to scale.
 - Body: Platform engineering and integrations gave a global product experience the speed and stability it needed.
@@ -150,36 +150,41 @@ Approved architecture: **Continuous Environmental Flight**, a frame-locked dive-
 - Five connector clips start on the prior dive's exact last frame, pull up and back, follow the amber-gold path through a physically continuous environment, and end on the next dive's exact first frame.
 - The pull-out reversal reveals a grounded route between locations; it must feel like a real, continuous camera move rather than a reset or rewind.
 - Every connector uses the previous dive's actual rendered last frame as its start image and the next dive's actual rendered first frame as its end image.
-- A short crossfade of approximately 0.08 seconds provides insurance without concealing mismatched frames.
+- Every seam uses a true complementary dissolve across `0.08` viewport height of scroll travel, centered on the segment boundary. Normalize the scroll position within that band to `t` and apply the existing smoothstep easing once; incoming opacity is the eased `t`, and outgoing opacity is `1 - t`. Their weights therefore sum to `1` throughout the band and both equal `0.5` at its midpoint. Outside the band, exactly one of the adjacent segments is opaque and the other is transparent.
+- Segment stacking order remains stable throughout the dissolve. The active-index change may update navigation and copy state, but it must not flip the visible media layer or create a hard cut at the boundary.
 - All chained clips in a render pass use the same model.
-- No clip may introduce cuts, geometry morphs, newly appearing objects, synthetic interface overlays, text, logos, or watermarks.
+- No clip may introduce cuts, geometry morphs, newly appearing objects, synthetic interface overlays, captions, typographic overlays, synthetic labels, promotional copy, watermarks, unrelated logos, or unrelated brand marks. Featured-client identity may remain only when physically integrated into its real environment, venue, vehicle, or product.
 
-## 6. Render Plan and Budget Gate
+## 6. Render Record and Future Budget Gate
 
-### Phase 1: approved photorealistic Draft/previz
+### Integrated photorealistic desktop chain
 
 - Still model: Higgsfield `gpt_image_2`, 16:9, 2k, high quality
 - Video model: `seedance_2_0_mini`, standard bitrate, 720p, audio disabled
 - Desktop only: six stills, six dives, five connectors
 - Base generations: 17
-- Current quoted base cost: 224.5 credits; 258.175 credits with 15% reroll headroom
+- Original quoted base cost: 224.5 credits; 258.175 credits with 15% reroll headroom
 - No native 9:16 chain and no center-crop mobile version
 
-The verified visible balance cannot fund the new chain, and the free-trial allowance is not exposed separately by the CLI. The project therefore supplies all prompts, model names, attributes, generation order, and filenames as a self-contained handoff; no generation is authorized from this repository task.
+The user generated the approved desktop assets from the self-contained handoff and supplied the raw outputs. The repository contains the six encoded WebP posters and eleven encoded H.264 clips. No rerender is required for the approved client signage or for the complementary-dissolve fix.
+
+The previously verified visible balance could not fund another complete chain, and the free-trial allowance was not exposed separately by the CLI. The project retains all prompts, model names, attributes, generation order, and filenames as a reproducible handoff. No additional generation is authorized without a newly verified allowance and explicit user approval.
 
 #### Superseded calibration record (historical evidence only)
 
 One earlier MarineMax still was generated at 3:2 under the former art direction. That job cost 7 credits and reduced the visible workspace balance from 8.95 to 1.95 credits. It remains only as calibration evidence and a temporary technical fallback; it is not approved production art and must not be included in the photorealistic handoff. The planned 8-second Mini dive was quoted at 20 credits and was not submitted. No further render jobs may run without a newly verified allowance and explicit authorization.
 
-Phase 2, re-rendering the approved chain with Standard `seedance_2_0` at 1080p, is not automatically authorized. It requires a separate cost estimate and user approval after the Draft chain is reviewed.
+Any future re-render of the approved chain with Standard `seedance_2_0` at 1080p is not automatically authorized. It requires a new cost estimate and explicit user approval.
 
 ## 7. Technical Architecture
 
-The workspace is empty, so this is a new standalone implementation:
+The result is a standalone vanilla-JavaScript implementation:
 
 - `index.html`: semantic page shell and mount point
 - `styles.css`: Verndale tokens, header, layout, responsive states, and non-video fallbacks
-- `scroll-world.js`: adapted portable scrub engine and configuration
+- `src/cases.js`: case-study content, asset URLs, pacing, CTA, and world configuration
+- `src/timeline.js`: pure timeline and complementary-dissolve calculations
+- `src/scroll-world.js`: adapted portable scrub engine and DOM rendering
 - `public/assets/stills/`: six approved photorealistic posters
 - `public/assets/video/`: six encoded dives and five encoded connectors
 - `render/` and generated handoff prompts: versioned still, dive, and connector instructions
@@ -218,7 +223,7 @@ Before completion:
 
 1. Inspect all six stills together for coherent large-format camera language, real-world materials, golden-hour-to-blue-hour continuity, practical lighting, and human scale.
 2. Extract and compare the frame on both sides of every dive/connector seam.
-3. Capture browser screenshots immediately before and after all ten seams and check for visible pops.
+3. Capture browser screenshots immediately before, at, and after all ten seams and check for visible pops.
 4. Confirm every blob reports a seekable range greater than zero.
 5. Verify that video `currentTime`, active copy, route state, and progress indicator track the same scroll band.
 6. Test direct jumps from all six route-rail items.
@@ -226,6 +231,7 @@ Before completion:
 8. Check the browser console for errors.
 9. Verify the static reduced-motion experience.
 10. Sanity-check a phone viewport for readable posters, safe spacing, and no overlap.
+11. At each seam, verify the outgoing and incoming opacity weights stay within `[0, 1]`, sum to `1`, meet at `0.5`, and do not change stacking order when the active segment changes.
 
 ## 10. Out of Scope
 
