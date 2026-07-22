@@ -75,7 +75,7 @@ export const CONNECTORS = Array.from({ length: CASES.length - 1 }, (_, index) =>
 export function createWorldConfig() {
   return {
     hero: {
-      copySide: 'left',
+      copySide: 'right',
       eyebrow: 'Connected experiences · measurable growth',
       title: 'Experience is your growth system.',
       body: 'We connect strategy, design, technology, data, AI and marketing to create digital experiences that perform.',

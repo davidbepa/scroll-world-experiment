@@ -38,7 +38,7 @@ test('hero and finale CTAs are exact', () => {
 
 test('hero and case copy sides match the approved desktop composition', () => {
   const config = createWorldConfig();
-  assert.equal(config.hero.copySide, 'left');
+  assert.equal(config.hero.copySide, 'right');
   assert.deepEqual(
     config.sections.map(({ copySide }) => copySide),
     ['right', 'left', 'left', 'right', 'right', 'left'],

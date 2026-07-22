@@ -272,7 +272,7 @@ test('directional copy backdrop follows readable copy and clears connectors', ()
     const controller = mountScrollWorld(root, {
       atmosphere: false,
       nav: false,
-      hero: { copySide: 'left', title: 'Hero', scroll: 0.5 },
+      hero: { copySide: 'right', title: 'Hero', scroll: 0.5 },
       connScroll: 0.5,
       sections: [
         { id: 'one', label: 'One', copySide: 'right', still: '', clip: '', scroll: 1 },
@@ -281,17 +281,24 @@ test('directional copy backdrop follows readable copy and clears connectors', ()
       connectors: ['connector.mp4'],
     });
 
-    const [backdrop] = root.querySelectorAll('.sw-copy-backdrop');
+    const backdrops = root.querySelectorAll('.sw-copy-backdrop');
+    const [backdrop] = backdrops;
     const [hero] = root.querySelectorAll('.sw-hero');
     const copies = root.querySelectorAll('.sw-copy');
     const css = fixture.document.getElementById('sw-css').textContent;
 
-    assert.ok(backdrop);
-    assert.equal(hero.dataset.side, 'left');
+    assert.equal(backdrops.length, 1);
+    assert.equal(hero.dataset.side, 'right');
     assert.deepEqual(copies.map(copy => copy.dataset.side), ['right', 'left']);
+    assert.match(css, /\.sw-copy-backdrop\[data-side="right"\]\{[^}]*transform:scaleX\(-1\)/);
     assert.doesNotMatch(css, /\.sw-copylayer::before/);
 
-    fixture.setScroll(600); // first-copy fade-in
+    fixture.setScroll(0);
+    fixture.dispatch('resize');
+    assert.equal(backdrop.dataset.side, 'right');
+    assert.equal(Number(backdrop.style.opacity), 1);
+
+    fixture.setScroll(600);
     fixture.dispatch('resize');
     assert.equal(Number(backdrop.style.opacity), Number(copies[0].style.opacity));
     assert.ok(Number(backdrop.style.opacity) > 0 && Number(backdrop.style.opacity) < 1);
