@@ -57,27 +57,21 @@
 
 - [ ] **Step 1: Replace the obsolete no-logo assertions with a failing branded-context contract**
 
-In `tests/prompts.test.js`, extend the prompt import and replace the test beginning `all prompts reject` with:
+In `tests/prompts.test.js`, keep the existing prompt import and replace the test beginning `all prompts reject` with:
 
 ```js
-import {
-  BRAND_CONTEXT, STYLE_PREAMBLE, buildStillPrompt, buildDivePrompt, buildConnectorPrompt,
-} from '../render/prompts.mjs';
-
 test('all prompts allow physical featured-client identity but reject synthetic branding', () => {
   const prompts = [
     ...CASES.flatMap(scene => [buildStillPrompt(scene), buildDivePrompt(scene)]),
     ...CASES.slice(0, -1).map((scene, index) => buildConnectorPrompt(scene, CASES[index + 1])),
   ];
 
-  assert.match(BRAND_CONTEXT, /featured client's real identity/i);
-  assert.match(BRAND_CONTEXT, /architectural signage/i);
-  assert.match(BRAND_CONTEXT, /venue identity/i);
-  assert.match(BRAND_CONTEXT, /product or vehicle marque/i);
-
   for (const prompt of prompts) {
     assert.doesNotMatch(prompt, /glossy systems|vinyl-toy|toy diorama|plastic diorama|collectible model/i);
-    assert.ok(prompt.includes(BRAND_CONTEXT));
+    assert.match(prompt, /featured client's real identity/i);
+    assert.match(prompt, /architectural signage/i);
+    assert.match(prompt, /venue identity/i);
+    assert.match(prompt, /product or vehicle marque/i);
     assert.match(prompt, /do not add captions/i);
     assert.match(prompt, /typographic overlays/i);
     assert.match(prompt, /synthetic labels/i);
@@ -123,7 +117,7 @@ Run:
 node --test tests/prompts.test.js tests/handoff.test.js
 ```
 
-Expected: FAIL because `BRAND_CONTEXT` is not exported and the tracked README still prohibits all logos and signage.
+Expected: FAIL on the featured-client identity assertion because the old prompt contract still prohibits all logos and signage.
 
 - [ ] **Step 3: Implement the approved prompt policy and case-specific subjects**
 
@@ -427,4 +421,3 @@ At the Aspen Snowmass → connector 4 seam (`scrollY = 8.45 × 900 = 7605`), cap
 git add src/timeline.js src/scroll-world.js tests/timeline.test.js tests/scroll-world.test.js
 git commit -m "fix: dissolve scroll-world scenes complementarily"
 ```
-
