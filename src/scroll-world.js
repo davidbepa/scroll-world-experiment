@@ -340,7 +340,12 @@ function mountScrollWorld(container, config) {
       s.snapToTarget = holdEndpoint || snapToEndpoint;
       s.target = holdEndpoint ? 1 : (s.linger ? lingerEase(local, s.linger) : local);
       const opacity = layerOpacities[i];
-      if (s.crossfadeAfter && opacity < 0.999) s.transitionComplete = false;
+      const transitionBand = Number.isFinite(s.crossfadeIn)
+        ? Math.max(0, s.crossfadeIn)
+        : fade;
+      const beforeSpecialHandoffEnds = s.crossfadeAfter
+        && y <= s.start + transitionBand;
+      if (beforeSpecialHandoffEnds && opacity < 0.999) s.transitionComplete = false;
       if (s.crossfadeAfter && opacity > 0.001) s.transitionHidden = false;
       const inHeroBand = i === 0 && HERO && y <= s.start;
       s.el.classList.toggle('has-clip', s.painted && !s.failed && !inHeroBand);

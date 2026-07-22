@@ -362,6 +362,49 @@ test('after-boundary scene fade keeps the connector alone through its endpoint',
   }
 });
 
+test('a completed after-boundary fade cannot block a later scene', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      crossfade: 0.08,
+      connScroll: 1,
+      sections: [
+        { id: 'one', label: 'One', still: '', clip: '', scroll: 1 },
+        {
+          id: 'two', label: 'Two', still: '', clip: '', scroll: 1,
+          crossfadeIn: 0.16, crossfadeAfter: true,
+        },
+        { id: 'three', label: 'Three', still: '', clip: '', scroll: 1 },
+      ],
+      connectors: ['connector-one.mp4', 'connector-two.mp4'],
+    });
+    const scenes = root.querySelectorAll('.sw-scene');
+    const specialScene = scenes[2];
+    const finishSpecialTransition = () => {
+      for (const handler of specialScene.listeners.get('transitionend') || []) {
+        handler({ propertyName: 'opacity' });
+      }
+    };
+
+    fixture.setScroll(1945); // first pixel after the post-boundary fade into scene two
+    fixture.dispatch('resize');
+    finishSpecialTransition();
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 0, 1, 0, 0]);
+
+    fixture.setScroll(4050); // middle of scene three
+    fixture.dispatch('resize');
+    finishSpecialTransition(); // scene two has now finished fading out
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 0, 0, 0, 1]);
+
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
 test('directional copy backdrop follows readable copy and clears connectors', () => {
   const fixture = createBrowserFixture();
   try {
