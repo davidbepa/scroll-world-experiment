@@ -8,7 +8,7 @@ export const CASES = [
     subject: 'A real marina at golden hour with a full-scale luxury yacht moored beside a contemporary glass, metal, and stone commerce pavilion; an amber-gold path embedded in the boardwalk connects the dock, a consultation lounge, and a refined boat-discovery gallery.',
     focalPoint: 'the full-scale yacht, marina boardwalk, and waterfront commerce pavilion',
     still: 'public/assets/stills/marinemax.webp', clip: 'public/assets/video/marinemax.mp4',
-    accent: '#6A2FF3', scroll: 1.5, linger: 0.35,
+    copySide: 'right', accent: '#6A2FF3', scroll: 1.5, linger: 0.35,
   },
   {
     id: 'southeast-toyota-finance', label: 'Southeast Toyota Finance',
@@ -19,7 +19,7 @@ export const CASES = [
     subject: 'A real Southeast Toyota Finance experience center at late golden hour, with a full-scale Toyota vehicle beneath a steel-and-glass canopy, restrained environmental client identity, private consultation bays, service lanes, and an amber-gold route branching naturally through the architecture.',
     focalPoint: 'the full-scale vehicle and branching route through the automotive-finance experience center',
     still: 'public/assets/stills/southeast-toyota-finance.webp', clip: 'public/assets/video/southeast-toyota-finance.mp4',
-    accent: '#FFB800', scroll: 1.25, linger: 0.2,
+    copySide: 'left', accent: '#FFB800', scroll: 1.25, linger: 0.2,
   },
   {
     id: 'iata', label: 'IATA',
@@ -30,7 +30,7 @@ export const CASES = [
     subject: 'A real IATA international airport and global-operations content hub at dusk, with a glass operations center overlooking active gates, aircraft on the apron, restrained environmental client identity, connected editorial workspaces, and an amber-gold path running from the concourse into the control room.',
     focalPoint: 'the airport operations center and connected global-operations content hub',
     still: 'public/assets/stills/iata.webp', clip: 'public/assets/video/iata.mp4',
-    accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
+    copySide: 'left', accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
   },
   {
     id: 'aspen-snowmass', label: 'Aspen Snowmass',
@@ -41,7 +41,7 @@ export const CASES = [
     subject: 'A real Aspen alpine resort during blue hour, with full-scale snow-covered peaks, a timber-and-stone lodge, gondola cabins, groomed trails, accessible arrival terraces, and an amber-gold path integrated into the resort lighting.',
     focalPoint: 'the gondola arrival, timber-and-stone lodge, and illuminated alpine route',
     still: 'public/assets/stills/aspen-snowmass.webp', clip: 'public/assets/video/aspen-snowmass.mp4',
-    accent: '#FFB800', scroll: 1.4, linger: 0.35,
+    copySide: 'right', accent: '#FFB800', scroll: 1.4, linger: 0.35,
   },
   {
     id: 'honda-powersports', label: 'Honda Powersports',
@@ -52,7 +52,7 @@ export const CASES = [
     subject: 'A real Honda Powersports performance engineering lab opening directly onto a floodlit racetrack at blue hour, with a full-scale Honda motorcycle on a service stand, restrained environmental client identity, metal test equipment, glass workshop partitions, and an amber-gold line continuing onto the circuit.',
     focalPoint: 'the full-scale motorcycle, engineering bay, and racetrack entry',
     still: 'public/assets/stills/honda-powersports.webp', clip: 'public/assets/video/honda-powersports.mp4',
-    accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
+    copySide: 'right', accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
   },
   {
     id: 'seaworld', label: 'SeaWorld',
@@ -63,7 +63,7 @@ export const CASES = [
     subject: 'A real theme-park arrival and commerce environment at blue hour, with an elegant illuminated entry canopy, ticketing pavilions, attraction silhouettes beyond the gates, stone promenades, and an amber-gold route leading from arrival to purchase. No people, no figures.',
     focalPoint: 'the illuminated arrival canopy, ticketing pavilions, and connected entry route',
     still: 'public/assets/stills/seaworld.webp', clip: 'public/assets/video/seaworld.mp4',
-    accent: '#FFB800', scroll: 1.7, linger: 0.45,
+    copySide: 'left', accent: '#FFB800', scroll: 1.7, linger: 0.45,
     cta: { primary: { label: "Build what's next", href: 'https://www.verndale.com/contact-us' } },
   },
 ];
@@ -75,6 +75,7 @@ export const CONNECTORS = Array.from({ length: CASES.length - 1 }, (_, index) =>
 export function createWorldConfig() {
   return {
     hero: {
+      copySide: 'left',
       eyebrow: 'Connected experiences · measurable growth',
       title: 'Experience is your growth system.',
       body: 'We connect strategy, design, technology, data, AI and marketing to create digital experiences that perform.',

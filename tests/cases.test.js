@@ -35,3 +35,12 @@ test('hero and finale CTAs are exact', () => {
   assert.equal(config.sections.at(-1).cta.primary.href, 'https://www.verndale.com/contact-us');
   assert.equal(config.mobileMode, 'posters');
 });
+
+test('hero and case copy sides match the approved desktop composition', () => {
+  const config = createWorldConfig();
+  assert.equal(config.hero.copySide, 'left');
+  assert.deepEqual(
+    config.sections.map(({ copySide }) => copySide),
+    ['right', 'left', 'left', 'right', 'right', 'left'],
+  );
+});
