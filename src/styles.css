@@ -43,8 +43,9 @@ a:focus-visible,button:focus-visible { outline:3px solid var(--purple); }
 }
 .sw-root .sw-topbar { display:none; }
 .sw-root .sw-sky { background:var(--lavender); }
-.sw-root .sw-copylayer::before { background:linear-gradient(90deg,var(--lavender) 0%,color-mix(in srgb,var(--lavender) 92%,transparent) 45%,transparent 100%); }
-.sw-root .sw-copy,.sw-root .sw-hero { left:clamp(24px,6vw,88px); width:min(40vw,520px); }
+.sw-root .sw-copy-backdrop { background:linear-gradient(90deg,var(--lavender) 0%,color-mix(in srgb,var(--lavender) 92%,transparent) 45%,transparent 100%); }
+.sw-root .sw-copy,.sw-root .sw-hero { left:clamp(24px,6vw,88px); right:auto; width:min(40vw,520px); }
+.sw-root .sw-copy[data-side="right"] { left:auto; right:clamp(150px,18vw,260px); width:min(38vw,500px); }
 .sw-root .sw-copy__eyebrow,.sw-root .sw-hero__eyebrow { color:var(--purple); }
 .sw-root .sw-copy__title,.sw-root .sw-hero__title { font-family:"Titillium Web",system-ui,sans-serif; }
 .sw-root .sw-copy__body,.sw-root .sw-hero__body { font-family:"Open Sans",system-ui,sans-serif; }

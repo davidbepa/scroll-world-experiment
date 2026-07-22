@@ -109,6 +109,9 @@ function mountScrollWorld(container, config) {
 
   const stage = el('div', 'sw-stage');
   const copylayer = el('div', 'sw-copylayer');
+  const copyBackdrop = el('div', 'sw-copy-backdrop');
+  copyBackdrop.dataset.side = 'left';
+  copylayer.appendChild(copyBackdrop);
   const route = el('div', 'sw-route');
   route.setAttribute('aria-label', 'Case studies');
   const hint = el('div', 'sw-hint');
@@ -159,6 +162,7 @@ function mountScrollWorld(container, config) {
   let hero = null;
   if (HERO) {
     hero = el('article', 'sw-hero');
+    hero.dataset.side = HERO.copySide === 'right' ? 'right' : 'left';
     hero.setAttribute('aria-labelledby', 'sw-hero-title');
     hero.innerHTML =
       (HERO.eyebrow ? `<span class="sw-hero__eyebrow">${esc(HERO.eyebrow)}</span>` : '') +
@@ -174,6 +178,7 @@ function mountScrollWorld(container, config) {
   SECTIONS.forEach((s, i) => {
     const copy = el('article', 'sw-copy');
     copy.id = s.id || '';
+    copy.dataset.side = s.copySide === 'right' ? 'right' : 'left';
     copy.style.setProperty('--sw-accent', s.accent || '');
     copy.innerHTML =
       `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` +
@@ -319,10 +324,16 @@ function mountScrollWorld(container, config) {
     }
 
     const position = y / vh;
+    let backdropOpacity = 0;
+    let backdropSide = 'left';
     if (hero) {
       const opacity = heroOpacity(position, HERO_SCROLL);
       hero.style.opacity = opacity;
       hero.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none';
+      if (opacity > backdropOpacity) {
+        backdropOpacity = opacity;
+        backdropSide = hero.dataset.side;
+      }
     }
     for (let i = 0; i < N; i += 1) {
       const segment = diveMathSegments[i];
@@ -338,7 +349,13 @@ function mountScrollWorld(container, config) {
       copy.style.opacity = opacity;
       copy.style.transform = reduce ? 'none' : `translateY(${(0.5 - progress) * 4}vh)`;
       copy.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none';
+      if (opacity > backdropOpacity) {
+        backdropOpacity = opacity;
+        backdropSide = copy.dataset.side;
+      }
     }
+    copyBackdrop.dataset.side = backdropSide;
+    copyBackdrop.style.opacity = backdropOpacity;
 
     const near = activeSectionIndex(position, mathSegments, N);
     if (near !== activeIndex) {
@@ -522,8 +539,10 @@ function injectCSS() {
   .sw-scene__still{will-change:transform}.sw-scene.has-clip .sw-scene__still{opacity:0}
   .sw-scene__video{z-index:1;opacity:0;visibility:hidden;}.sw-scene.has-clip .sw-scene__video{opacity:1;visibility:visible;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
-  .sw-copylayer::before{content:"";position:absolute;inset:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
-  .sw-copy,.sw-hero{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,520px);opacity:0;will-change:opacity,transform;}
+  .sw-copy-backdrop{position:absolute;inset:0 auto 0 0;z-index:0;width:min(58vw,780px);opacity:0;will-change:opacity;background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
+  .sw-copy-backdrop[data-side="right"]{left:auto;right:0;transform:scaleX(-1);}
+  .sw-copy,.sw-hero{position:absolute;z-index:1;left:clamp(18px,5vw,64px);right:auto;top:50%;transform:translateY(-50%);width:min(42vw,520px);opacity:0;will-change:opacity,transform;}
+  .sw-copy[data-side="right"]{left:auto;right:clamp(150px,18vw,260px);}
   .sw-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:var(--sw-ink-soft);}
   .sw-copy__eyebrow,.sw-hero__eyebrow{display:block;margin-top:18px;font-family:var(--sw-font-display);font-weight:700;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sw-accent);}
   .sw-copy__title,.sw-hero__title{font-family:var(--sw-font-display);font-weight:700;color:var(--sw-ink);font-size:clamp(2rem,4.4vw,3.5rem);line-height:1.03;margin:12px 0 0;letter-spacing:-.01em;text-shadow:0 2px 20px color-mix(in srgb,var(--sw-bg) 70%,transparent);}
@@ -554,9 +573,9 @@ function injectCSS() {
   .sw-status__label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sw-ink-soft);}
   .sw-track{position:relative;z-index:1;width:100%;pointer-events:none;}
   @media(max-width:860px){
-    .sw-nav{display:none}.sw-copylayer::before{width:100%;height:60%;top:auto;bottom:0;background:linear-gradient(0deg,var(--sw-bg) 8%,color-mix(in srgb,var(--sw-bg) 70%,transparent) 46%,transparent 100%);}
-    .sw-copy,.sw-hero{left:clamp(18px,5vw,64px);right:clamp(18px,5vw,64px);top:auto;bottom:clamp(64px,14vh,120px);transform:none;width:auto;max-width:560px;}
-    .sw-copy,.sw-hero{bottom:calc(clamp(56px,12dvh,110px) + env(safe-area-inset-bottom));}
+    .sw-nav{display:none}.sw-copy-backdrop,.sw-copy-backdrop[data-side="right"]{left:0;right:0;width:100%;height:60%;top:auto;bottom:0;transform:none;background:linear-gradient(0deg,var(--sw-bg) 8%,color-mix(in srgb,var(--sw-bg) 70%,transparent) 46%,transparent 100%);}
+    .sw-copy,.sw-copy[data-side="right"],.sw-hero{left:clamp(18px,5vw,64px);right:clamp(18px,5vw,64px);top:auto;bottom:clamp(64px,14vh,120px);transform:none;width:auto;max-width:560px;}
+    .sw-copy,.sw-copy[data-side="right"],.sw-hero{bottom:calc(clamp(56px,12dvh,110px) + env(safe-area-inset-bottom));}
     .sw-copy__title{font-size:clamp(1.9rem,7.5vw,2.7rem)}.sw-copy__body{max-width:none;font-size:clamp(.98rem,3.6vw,1.1rem)}.sw-scene__video,.sw-scene__still{object-position:center 46%;}
     .sw-hint{bottom:calc(20px + env(safe-area-inset-bottom))}.sw-route{gap:16px;right:6px}.sw-route__label{display:none}.sw-status{display:none;}
   }

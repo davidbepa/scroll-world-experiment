@@ -264,3 +264,55 @@ test('scene layers dissolve complementarily without changing stacking order', ()
     fixture.restore();
   }
 });
+
+test('directional copy backdrop follows readable copy and clears connectors', () => {
+  const fixture = createBrowserFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      hero: { copySide: 'left', title: 'Hero', scroll: 0.5 },
+      connScroll: 0.5,
+      sections: [
+        { id: 'one', label: 'One', copySide: 'right', still: '', clip: '', scroll: 1 },
+        { id: 'two', label: 'Two', copySide: 'left', still: '', clip: '', scroll: 1 },
+      ],
+      connectors: ['connector.mp4'],
+    });
+
+    const [backdrop] = root.querySelectorAll('.sw-copy-backdrop');
+    const [hero] = root.querySelectorAll('.sw-hero');
+    const copies = root.querySelectorAll('.sw-copy');
+    const css = fixture.document.getElementById('sw-css').textContent;
+
+    assert.ok(backdrop);
+    assert.equal(hero.dataset.side, 'left');
+    assert.deepEqual(copies.map(copy => copy.dataset.side), ['right', 'left']);
+    assert.doesNotMatch(css, /\.sw-copylayer::before/);
+
+    fixture.setScroll(600); // first-copy fade-in
+    fixture.dispatch('resize');
+    assert.equal(Number(backdrop.style.opacity), Number(copies[0].style.opacity));
+    assert.ok(Number(backdrop.style.opacity) > 0 && Number(backdrop.style.opacity) < 1);
+
+    fixture.setScroll(900); // center of first dive
+    fixture.dispatch('resize');
+    assert.equal(backdrop.dataset.side, 'right');
+    assert.equal(Number(backdrop.style.opacity), 1);
+
+    fixture.setScroll(1575); // center of connector
+    fixture.dispatch('resize');
+    assert.equal(Number(backdrop.style.opacity), 0);
+    assert.deepEqual(copies.map(copy => Number(copy.style.opacity)), [0, 0]);
+
+    fixture.setScroll(2250); // center of second dive
+    fixture.dispatch('resize');
+    assert.equal(backdrop.dataset.side, 'left');
+    assert.equal(Number(backdrop.style.opacity), 1);
+
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
