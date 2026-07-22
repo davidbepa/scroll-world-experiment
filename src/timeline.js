@@ -17,8 +17,8 @@ export function segmentLayerOpacities(position, segments, crossfade) {
       : defaultBand;
     if (band <= 0) continue;
     const boundary = nextSegment.start;
-    const bandStart = boundary - band / 2;
-    const bandEnd = boundary + band / 2;
+    const bandStart = nextSegment.crossfadeAfter ? boundary : boundary - band / 2;
+    const bandEnd = bandStart + band;
     if (position < bandStart || position > bandEnd) continue;
     const incoming = smoothstep((position - bandStart) / band);
     opacities[index] = 1;

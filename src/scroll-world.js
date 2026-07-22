@@ -62,6 +62,7 @@ function mountScrollWorld(container, config) {
       still: s.still, stillM: s.stillMobile, accent: s.accent,
       w: s.scroll || DIVE_W, linger: s.linger || 0,
       crossfadeInVh: s.crossfadeIn,
+      crossfadeAfter: s.crossfadeAfter === true,
     };
     SEGMENTS.push(dive);
     s._seg = dive;

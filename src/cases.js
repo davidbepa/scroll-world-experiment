@@ -52,7 +52,8 @@ export const CASES = [
     subject: 'A real Honda Powersports performance engineering lab opening directly onto a floodlit racetrack at blue hour, with a full-scale Honda motorcycle on a service stand, restrained environmental client identity, metal test equipment, glass workshop partitions, and an amber-gold line continuing onto the circuit.',
     focalPoint: 'the full-scale motorcycle, engineering bay, and racetrack entry',
     still: 'public/assets/stills/honda-powersports.webp', clip: 'public/assets/video/honda-powersports.mp4',
-    copySide: 'right', accent: '#6A2FF3', scroll: 1.25, linger: 0.2, crossfadeIn: 0.16,
+    copySide: 'right', accent: '#6A2FF3', scroll: 1.25, linger: 0.2,
+    crossfadeIn: 0.16, crossfadeAfter: true,
   },
   {
     id: 'seaworld', label: 'SeaWorld',

@@ -88,3 +88,18 @@ test('an incoming segment can lengthen only its own crossfade band', () => {
   assert.deepEqual(segmentLayerOpacities(185, blendSegments, 20), [0, 1, 0.04296875]);
   assert.deepEqual(segmentLayerOpacities(200, blendSegments, 20), [0, 1, 0.5]);
 });
+
+test('an after-boundary crossfade holds the outgoing segment through the endpoint', () => {
+  const blendSegments = [
+    { start: 0, end: 100 },
+    { start: 100, end: 200 },
+    { start: 200, end: 300, crossfadeIn: 40, crossfadeAfter: true },
+  ];
+
+  assert.deepEqual(segmentLayerOpacities(199, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentLayerOpacities(200, blendSegments, 20), [0, 1, 0]);
+  assert.deepEqual(segmentLayerOpacities(210, blendSegments, 20), [0, 1, 0.15625]);
+  assert.deepEqual(segmentLayerOpacities(220, blendSegments, 20), [0, 1, 0.5]);
+  assert.deepEqual(segmentLayerOpacities(240, blendSegments, 20), [0, 1, 1]);
+  assert.deepEqual(segmentLayerOpacities(241, blendSegments, 20), [0, 0, 1]);
+});
