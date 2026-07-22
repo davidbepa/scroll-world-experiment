@@ -1,6 +1,6 @@
 :root { --yellow:#FFB800; --purple:#6A2FF3; --lavender:#E1D5FD; --ink:#1C1C1C; --white:#FFFFFF; }
 * { box-sizing:border-box; }
-html { scroll-behavior:smooth; background:var(--lavender); color:var(--ink); }
+html { scroll-behavior:smooth; background:var(--white); color:var(--ink); }
 body { margin:0; font-family:"Open Sans",system-ui,sans-serif; background:var(--lavender); }
 h1,h2,h3 { font-family:"Titillium Web",system-ui,sans-serif; text-wrap:balance; }
 a,button { outline-offset:4px; }
