@@ -93,6 +93,16 @@ class FakeElement {
     this.listeners.get(type)?.delete(handler);
   }
 
+  dispatch(type, event = {}) {
+    for (const handler of this.listeners.get(type) || []) handler(event);
+  }
+
+  pause() {}
+
+  play() {
+    return Promise.resolve();
+  }
+
   querySelectorAll(selector) {
     const className = selector.startsWith('.') ? selector.slice(1) : null;
     const matches = [];
@@ -105,10 +115,12 @@ class FakeElement {
   }
 }
 
-function createBrowserFixture({ reduceMotion = true } = {}) {
+function createBrowserFixture({ reduceMotion = true, fetchImpl } = {}) {
+  const documentElement = new FakeElement('html');
   const head = new FakeElement('head');
   const body = new FakeElement('body');
   const document = {
+    documentElement,
     head,
     body,
     createElement: tagName => new FakeElement(tagName),
@@ -145,11 +157,18 @@ function createBrowserFixture({ reduceMotion = true } = {}) {
     document: globalThis.document,
     requestAnimationFrame: globalThis.requestAnimationFrame,
     cancelAnimationFrame: globalThis.cancelAnimationFrame,
+    fetch: globalThis.fetch,
+    URL: globalThis.URL,
   };
   globalThis.window = window;
   globalThis.document = document;
   globalThis.requestAnimationFrame = () => 1;
   globalThis.cancelAnimationFrame = () => {};
+  globalThis.fetch = fetchImpl ?? previous.fetch;
+  globalThis.URL = {
+    createObjectURL: blob => `blob:${blob.url ?? 'test'}`,
+    revokeObjectURL() {},
+  };
 
   return {
     document,
@@ -171,6 +190,8 @@ function createBrowserFixture({ reduceMotion = true } = {}) {
   };
 }
 
+const flush = () => new Promise(resolve => setImmediate(resolve));
+
 function config() {
   return {
     atmosphere: false,
@@ -188,6 +209,41 @@ test('video stays hidden until its scene has painted a clip', () => {
 
     assert.match(css, /\.sw-scene__video\{[^}]*opacity:0;[^}]*visibility:hidden;/);
     assert.match(css, /\.sw-scene\.has-clip \.sw-scene__video\{[^}]*opacity:1;[^}]*visibility:visible;/);
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('priority clip fetches are idempotent and settle after decoded data', async () => {
+  const requests = [];
+  const fixture = createBrowserFixture({
+    reduceMotion: false,
+    fetchImpl: async url => {
+      requests.push(url);
+      return { ok: true, blob: async () => ({ url }) };
+    },
+  });
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      sections: [
+        { id: 'one', label: 'One', still: '', clip: 'one.mp4', scroll: 1 },
+        { id: 'two', label: 'Two', still: '', clip: 'two.mp4', scroll: 1 },
+      ],
+      connectors: ['connector.mp4'],
+    });
+    await flush();
+    assert.deepEqual(requests, ['one.mp4', 'connector.mp4', 'two.mp4']);
+    for (const video of root.querySelectorAll('.sw-scene__video')) {
+      video.duration = 5;
+      video.dispatch('loadedmetadata');
+      video.dispatch('loadeddata');
+    }
+    await controller.whenReady;
+    assert.equal(new Set(requests).size, 3);
     controller.destroy();
   } finally {
     fixture.restore();

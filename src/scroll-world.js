@@ -13,6 +13,9 @@ import {
   shouldSnapToSeamEndpoint, sectionPresentationSegment, mediaAtEdge,
   shouldHoldSeamEndpoint,
 } from './timeline.js';
+import {
+  backgroundPreloadOrder, runPreloadQueue, selectPriorityIndices,
+} from './preload.js';
 
 const FALLBACK_STILL = 'public/assets/fallback-system.svg';
 const stylesheetRegistry = new WeakMap();
@@ -170,6 +173,7 @@ function mountScrollWorld(container, config) {
     Object.assign(s, {
       el: scene, img, video: null, hasClip: false, loading: false,
       ready: false, painted: false, failed: false, objectUrl: null,
+      loadPromise: null, resolveLoad: null, loadSettled: false, abortController: null,
       cur: 0, target: 0, visible: false,
     });
   });
@@ -258,6 +262,15 @@ function mountScrollWorld(container, config) {
     });
   }
 
+  function settleClip(s, playable) {
+    if (s.loadSettled) return;
+    s.loadSettled = true;
+    s.loading = false;
+    const resolve = s.resolveLoad;
+    s.resolveLoad = null;
+    resolve?.({ playable, failed: s.failed });
+  }
+
   function markMediaError(s, video = null) {
     if (s.failed) return;
     s.failed = true;
@@ -273,13 +286,19 @@ function mountScrollWorld(container, config) {
       objectUrls.delete(s.objectUrl);
       s.objectUrl = null;
     }
+    settleClip(s, false);
   }
 
   function loadClip(s) {
-    if (reduce || s.loading || s.failed || !s.clip || destroyed) return;
+    if (s.loadPromise) return s.loadPromise;
+    if (reduce || !s.clip || destroyed) {
+      return Promise.resolve({ playable: !s.clip, failed: false });
+    }
     s.loading = true;
+    s.loadPromise = new Promise(resolve => { s.resolveLoad = resolve; });
+    s.abortController = new AbortController();
     const url = isMobile() && s.clipM ? s.clipM : s.clip;
-    fetch(url)
+    fetch(url, { signal: s.abortController.signal })
       .then(response => response.ok ? response.blob() : Promise.reject(new Error(`Media request failed: ${response.status}`)))
       .then(blob => {
         if (destroyed) return;
@@ -300,19 +319,61 @@ function mountScrollWorld(container, config) {
           read();
         });
         listen(video, 'seeked', () => {
+          if (destroyed || s.failed) return;
           s.painted = true;
           read();
         });
         listen(video, 'loadeddata', () => {
+          if (destroyed || s.failed) return;
+          s.ready = true;
+          s.painted = true;
           try { video.pause(); } catch (error) { /* no-op */ }
           if (userReady) primeVideo(video);
+          settleClip(s, true);
+          read();
         });
         listen(video, 'error', () => markMediaError(s, video), { once: true });
         s.el.appendChild(video);
         s.video = video;
         s.hasClip = true;
       })
-      .catch(() => markMediaError(s));
+      .catch(error => {
+        if (!destroyed && error?.name !== 'AbortError') markMediaError(s);
+      });
+    return s.loadPromise;
+  }
+
+  let initialReadyResolved = false;
+  let resolveInitialReady;
+  const whenReady = new Promise(resolve => { resolveInitialReady = resolve; });
+
+  function markInitialReady() {
+    if (initialReadyResolved) return;
+    initialReadyResolved = true;
+    resolveInitialReady();
+  }
+
+  function segmentIndexAt(position) {
+    let index = 0;
+    for (let i = 0; i < NSEG; i += 1) {
+      if (position >= SEGMENTS[i].start) index = i;
+    }
+    return index;
+  }
+
+  async function startPreloading() {
+    if (reduce || destroyed) {
+      markInitialReady();
+      return;
+    }
+    const position = window.scrollY || window.pageYOffset;
+    const active = segmentIndexAt(position);
+    const priority = selectPriorityIndices(SEGMENTS, position, 3);
+    await Promise.all(priority.map(index => loadClip(SEGMENTS[index])));
+    if (destroyed) return;
+    markInitialReady();
+    const background = backgroundPreloadOrder(SEGMENTS, priority, active);
+    void runPreloadQueue(background, index => loadClip(SEGMENTS[index]), 2);
   }
 
   function read() {
@@ -469,6 +530,11 @@ function mountScrollWorld(container, config) {
     cleanups.splice(0).forEach(cleanup => cleanup());
     cancelAnimationFrame(animationFrame);
     cancelAnimationFrame(readFrame);
+    SEGMENTS.forEach(segment => {
+      segment.abortController?.abort();
+      if (!segment.loadSettled && segment.resolveLoad) settleClip(segment, false);
+    });
+    markInitialReady();
     objectUrls.forEach(url => URL.revokeObjectURL(url));
     objectUrls.clear();
     SEGMENTS.forEach(segment => { segment.img.onerror = null; });
@@ -486,10 +552,12 @@ function mountScrollWorld(container, config) {
   listen(window, 'orientationchange', layout);
   listen(window, 'load', layout);
   layout();
+  void startPreloading();
   animationFrame = requestAnimationFrame(raf);
 
   return {
     jumpTo,
+    whenReady,
     getState: () => ({ activeIndex, segmentIndex: currentSegmentIndex, totalScroll: totalW }),
     destroy,
   };
