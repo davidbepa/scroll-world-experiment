@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const styles = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8');
 const engine = await readFile(new URL('../src/scroll-world.js', import.meta.url), 'utf8');
+const index = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
 function atRuleBlock(css, atRule) {
   const start = css.indexOf(atRule);
@@ -67,4 +68,41 @@ test('desktop-only film layout preserves global skin and engine mobile behavior'
   assert.match(engineMobile, /\.sw-copy,\.sw-copy\[data-side="right"\],\.sw-hero\{left:clamp\(18px,5vw,64px\);right:clamp\(18px,5vw,64px\);/);
   assert.match(engineMobile, /\.sw-status\{display:none;\}/);
   assert.doesNotMatch(desktopFilm, /\.sw-root \.sw-copylayer::before/);
+});
+
+test('scene copy overlay and desktop header use the approved gradients', () => {
+  const desktopFilm = atRuleBlock(styles, '@media (min-width:861px)');
+  const backdropRule = styles.match(/\.sw-root \.sw-copy-backdrop\s*\{([^}]*)\}/)?.[1] ?? '';
+  const headerRule = desktopFilm.match(/\.site-header\s*\{([^}]*)\}/)?.[1] ?? '';
+
+  assert.match(
+    backdropRule,
+    /background:linear-gradient\(90deg,color-mix\(in srgb,var\(--lavender\) 96%,transparent\) 0%,color-mix\(in srgb,var\(--lavender\) 80%,transparent\) 28%,color-mix\(in srgb,var\(--lavender\) 38%,transparent\) 56%,transparent 78%\);/,
+  );
+  assert.match(
+    headerRule,
+    /background:linear-gradient\(180deg,color-mix\(in srgb,var\(--white\) 96%,transparent\) 0%,color-mix\(in srgb,var\(--white\) 76%,transparent\) 55%,transparent 100%\);/,
+  );
+  assert.doesNotMatch(headerRule, /var\(--(?:lavender|purple)\)/);
+});
+
+test('header uses the supplied official logo asset', async () => {
+  const logo = await readFile(
+    new URL('../public/assets/brand/verndale-logo.svg', import.meta.url),
+    'utf8',
+  ).catch(() => '');
+
+  assert.match(
+    index,
+    /<a class="site-brand" href="https:\/\/www\.verndale\.com\/" aria-label="Verndale home"><img src="public\/assets\/brand\/verndale-logo\.svg" alt="" \/><\/a>/,
+  );
+  assert.doesNotMatch(index, /<span aria-hidden="true"><\/span>VERNDALE/);
+  assert.match(
+    styles,
+    /\.site-brand img\s*\{[^}]*display:block;[^}]*width:clamp\(142px,12\.5vw,180px\);[^}]*height:auto;/,
+  );
+  assert.doesNotMatch(styles, /\.site-brand span\s*\{/);
+  assert.match(logo, /width="390\.35" height="81\.36"/);
+  assert.match(logo, /viewBox="0 0 390\.35 81\.36"/);
+  assert.match(logo, /fill="#ffb800"/);
 });
