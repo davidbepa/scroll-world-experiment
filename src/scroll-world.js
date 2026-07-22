@@ -11,7 +11,7 @@ import {
   clamp, lingerEase, buildSegments, heroOpacity, sectionCopyOpacity,
   activeSectionIndex, segmentLayerOpacities, segmentMediaProgress, nextMediaProgress,
   shouldSnapToSeamEndpoint, sectionPresentationSegment, mediaAtEdge,
-  shouldHoldSeamEndpoint,
+  shouldHoldSeamEndpoint, isSegmentPlayable, reachableSegmentIndex,
 } from './timeline.js';
 import {
   backgroundPreloadOrder, runPreloadQueue, selectPriorityIndices,
@@ -276,6 +276,7 @@ function mountScrollWorld(container, config) {
   let totalW = 0;
   let activeIndex = -1;
   let currentSegmentIndex = 0;
+  let displaySegmentIndex = 0;
   let ticking = false;
   let laidOutW = window.innerWidth;
 
@@ -311,6 +312,7 @@ function mountScrollWorld(container, config) {
     const resolve = s.resolveLoad;
     s.resolveLoad = null;
     resolve?.({ playable, failed: s.failed });
+    if (!destroyed) read();
   }
 
   function markMediaError(s, video = null) {
@@ -372,7 +374,6 @@ function mountScrollWorld(container, config) {
           try { video.pause(); } catch (error) { /* no-op */ }
           if (userReady) primeVideo(video);
           settleClip(s, true);
-          read();
         });
         listen(video, 'error', () => markMediaError(s, video), { once: true });
         s.el.appendChild(video);
@@ -429,6 +430,8 @@ function mountScrollWorld(container, config) {
       loaderFill.style.transform = `scaleX(${settledPriority / priority.length})`;
     }));
     if (destroyed) return;
+    displaySegmentIndex = segmentIndexAt(window.scrollY || window.pageYOffset);
+    read();
     loader.classList.add('is-complete');
     container.dataset.loading = 'false';
     unlockScroll();
@@ -441,20 +444,45 @@ function mountScrollWorld(container, config) {
     if (destroyed) return;
     const y = window.scrollY || window.pageYOffset;
     const fade = CROSSFADE * vh;
-    const layerOpacities = segmentLayerOpacities(
-      y,
-      SEGMENTS,
-      fade,
-      (outgoingIndex, incomingIndex) => mediaAtEdge(SEGMENTS[outgoingIndex], 'end')
-        && mediaAtEdge(SEGMENTS[incomingIndex], 'start'),
-    );
-    let ci = 0;
-    for (let i = 0; i < NSEG; i += 1) if (y >= SEGMENTS[i].start) ci = i;
-    currentSegmentIndex = ci;
+    const requestedSegmentIndex = segmentIndexAt(y);
+    const reachable = reduce
+      ? requestedSegmentIndex
+      : reachableSegmentIndex(displaySegmentIndex, requestedSegmentIndex, SEGMENTS);
+    const waitingForChapter = !reduce && reachable !== requestedSegmentIndex;
+    displaySegmentIndex = reachable;
+    currentSegmentIndex = requestedSegmentIndex;
+
+    let seamHoldIndex = -1;
+    for (let index = 0; !reduce && index < NSEG - 1; index += 1) {
+      const incoming = SEGMENTS[index + 1];
+      const transitionBand = Number.isFinite(incoming.crossfadeIn)
+        ? Math.max(0, incoming.crossfadeIn)
+        : fade;
+      const bandStart = incoming.crossfadeAfter
+        ? incoming.start
+        : incoming.start - transitionBand / 2;
+      const bandEnd = bandStart + transitionBand;
+      if (y >= bandStart && y <= bandEnd && !isSegmentPlayable(incoming)) {
+        seamHoldIndex = index;
+        break;
+      }
+    }
+    const waitingAtSeam = seamHoldIndex >= 0;
+    const heldIndex = waitingForChapter ? displaySegmentIndex : seamHoldIndex;
+    const layerOpacities = waitingForChapter || waitingAtSeam
+      ? SEGMENTS.map((segment, index) => (index === heldIndex ? 1 : 0))
+      : segmentLayerOpacities(
+        y,
+        SEGMENTS,
+        fade,
+        (outgoingIndex, incomingIndex) => (reduce || isSegmentPlayable(SEGMENTS[incomingIndex]))
+          && mediaAtEdge(SEGMENTS[outgoingIndex], 'end')
+          && mediaAtEdge(SEGMENTS[incomingIndex], 'start'),
+      );
+    chapterLoader.classList.toggle('is-active', waitingForChapter || waitingAtSeam);
 
     for (let i = 0; i < NSEG; i += 1) {
       const s = SEGMENTS[i];
-      if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
       const local = segmentMediaProgress(y, s);
       const holdEndpoint = s.kind === 'conn' && shouldHoldSeamEndpoint(SEGMENTS[i + 1]);
       const snapToEndpoint = s.kind === 'conn'
@@ -469,8 +497,7 @@ function mountScrollWorld(container, config) {
         && y <= s.start + transitionBand;
       if (beforeSpecialHandoffEnds && opacity < 0.999) s.transitionComplete = false;
       if (s.crossfadeAfter && opacity > 0.001) s.transitionHidden = false;
-      const inHeroBand = i === 0 && HERO && y <= s.start;
-      s.el.classList.toggle('has-clip', s.painted && !s.failed && !inHeroBand);
+      s.el.classList.toggle('has-clip', s.painted && !s.failed);
       s.el.style.opacity = opacity;
       s.visible = opacity > 0.001;
       if (!s.hasClip || !s.ready) {

@@ -192,6 +192,66 @@ function createBrowserFixture({ reduceMotion = true, fetchImpl } = {}) {
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
+function createControlledMediaFixture() {
+  const requests = new Map();
+  const fixture = createBrowserFixture({
+    reduceMotion: false,
+    fetchImpl: url => new Promise((resolve, reject) => {
+      requests.set(url, { resolve, reject });
+    }),
+  });
+
+  async function waitForRequest(url) {
+    while (!requests.has(url)) await flush();
+    return requests.get(url);
+  }
+
+  fixture.resolveVideo = async (root, url) => {
+    const request = await waitForRequest(url);
+    request.resolve({ ok: true, blob: async () => ({ url }) });
+    await flush();
+    const video = root.querySelectorAll('.sw-scene__video')
+      .find(candidate => candidate.src === `blob:${url}`);
+    assert.ok(video, `missing video element for ${url}`);
+    video.duration = 5;
+    video.dispatch('loadedmetadata');
+    video.dispatch('loadeddata');
+    await flush();
+  };
+
+  fixture.rejectVideo = async url => {
+    const request = await waitForRequest(url);
+    request.reject(new Error(`failed ${url}`));
+    await flush();
+  };
+
+  fixture.settlePriorityVideos = async root => {
+    await Promise.all([
+      fixture.resolveVideo(root, 'one.mp4'),
+      fixture.resolveVideo(root, 'one-two.mp4'),
+      fixture.resolveVideo(root, 'two.mp4'),
+    ]);
+  };
+
+  fixture.requestedUrls = () => [...requests.keys()];
+
+  return fixture;
+}
+
+function threeSceneFilmConfig() {
+  return {
+    atmosphere: false,
+    nav: false,
+    connScroll: 1,
+    sections: [
+      { id: 'one', label: 'One', still: 'one.webp', clip: 'one.mp4', scroll: 1 },
+      { id: 'two', label: 'Two', still: 'two.webp', clip: 'two.mp4', scroll: 1 },
+      { id: 'three', label: 'Three', still: 'three.webp', clip: 'three.mp4', scroll: 1 },
+    ],
+    connectors: ['one-two.mp4', 'two-three.mp4'],
+  };
+}
+
 function config() {
   return {
     atmosphere: false,
@@ -303,6 +363,100 @@ test('destroy restores scrolling while priority media is pending', () => {
     controller.destroy();
     assert.equal(fixture.document.documentElement.style.overflow, '');
     assert.equal(fixture.document.body.style.overflow, 'scroll');
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('fast scrolling holds decoded video instead of exposing an unready poster', async () => {
+  const fixture = createControlledMediaFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, threeSceneFilmConfig());
+    await fixture.settlePriorityVideos(root);
+    await controller.whenReady;
+    const scenes = root.querySelectorAll('.sw-scene');
+    fixture.setScroll(4050);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 0, 1, 0, 0]);
+    assert.equal(root.querySelectorAll('.sw-chapter-loader')[0].classList.contains('is-active'), true);
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('an unready incoming clip cannot leak its poster inside the crossfade band', async () => {
+  const fixture = createControlledMediaFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, threeSceneFilmConfig());
+    await fixture.settlePriorityVideos(root);
+    await controller.whenReady;
+    const scenes = root.querySelectorAll('.sw-scene');
+    fixture.setScroll(2660);
+    fixture.dispatch('resize');
+    assert.deepEqual(scenes.map(scene => Number(scene.style.opacity)), [0, 0, 1, 0, 0]);
+    assert.equal(root.querySelectorAll('.sw-chapter-loader')[0].classList.contains('is-active'), true);
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('fast scrolling cannot bypass the two-worker background queue', async () => {
+  const fixture = createControlledMediaFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      connScroll: 1,
+      sections: [
+        { id: 'one', label: 'One', still: '', clip: 'one.mp4', scroll: 1 },
+        { id: 'two', label: 'Two', still: '', clip: 'two.mp4', scroll: 1 },
+        { id: 'three', label: 'Three', still: '', clip: 'three.mp4', scroll: 1 },
+        { id: 'four', label: 'Four', still: '', clip: 'four.mp4', scroll: 1 },
+        { id: 'five', label: 'Five', still: '', clip: 'five.mp4', scroll: 1 },
+      ],
+      connectors: [
+        'one-two.mp4', 'two-three.mp4', 'three-four.mp4', 'four-five.mp4',
+      ],
+    });
+    await fixture.settlePriorityVideos(root);
+    await controller.whenReady;
+    await flush();
+    assert.deepEqual(fixture.requestedUrls(), [
+      'one.mp4', 'one-two.mp4', 'two.mp4', 'two-three.mp4', 'three.mp4',
+    ]);
+    fixture.setScroll(7650);
+    fixture.dispatch('resize');
+    await flush();
+    assert.deepEqual(fixture.requestedUrls(), [
+      'one.mp4', 'one-two.mp4', 'two.mp4', 'two-three.mp4', 'three.mp4',
+    ]);
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('failed future video releases the readiness hold to its poster', async () => {
+  const fixture = createControlledMediaFixture();
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, threeSceneFilmConfig());
+    await fixture.settlePriorityVideos(root);
+    await controller.whenReady;
+    await fixture.resolveVideo(root, 'two-three.mp4');
+    await fixture.rejectVideo('three.mp4');
+    fixture.setScroll(4050);
+    fixture.dispatch('resize');
+    const scenes = root.querySelectorAll('.sw-scene');
+    assert.equal(Number(scenes[4].style.opacity), 1);
+    assert.equal(scenes[4].classList.contains('has-clip'), false);
+    assert.equal(root.querySelectorAll('.sw-chapter-loader')[0].classList.contains('is-active'), false);
+    controller.destroy();
   } finally {
     fixture.restore();
   }
