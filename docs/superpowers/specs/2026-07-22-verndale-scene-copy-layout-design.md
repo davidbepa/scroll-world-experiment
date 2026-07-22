@@ -33,7 +33,13 @@ The existing scene-copy opacity remains the source of truth for when text is rea
 - Connector segments show neither case copy nor scrim.
 - The scrim may change sides only while hidden or as the matching copy becomes visible, preventing a visible side-swap.
 
-The media-layer dissolve remains unchanged. Removing the persistent scrim must expose more of the footage during transitions without altering video timing, seeking, stacking, or crossfade weights.
+## Coverage-preserving media dissolve
+
+The crossfade band keeps its current duration, location, easing, and stable segment stacking, but its opacity model changes. The current complementary values (`0.5` outgoing and `0.5` incoming at the midpoint) provide only `0.75` effective alpha coverage when composited, exposing the lavender particle background.
+
+Within each seam band, the earlier/lower media layer stays at opacity `1` while the later/upper media layer eases from `0` to `1`. At the midpoint the layer opacities are therefore `1` and `0.5`, producing effective coverage `0.5 + 1 × (1 - 0.5) = 1`. Immediately after the band, the upper layer remains at `1` and the lower layer becomes `0`. Reverse scrolling naturally fades the upper layer back out over the still-opaque lower layer.
+
+Outside a seam band, exactly one segment remains opaque. The change must not alter segment timing, video seeking, scroll distances, DOM stacking order, or boundary-frame selection.
 
 ## Runtime structure
 
@@ -59,10 +65,12 @@ Automated coverage must prove:
 4. The engine creates a dedicated scrim, mirrors its direction for right-side copy, and does not retain the old always-on copy-layer overlay.
 5. Right-side hero/case panels right-align text, tags, and CTAs; left-side panels remain left-aligned.
 6. The Verndale skin hides `.sw-route` while preserving `.sw-status`.
-7. Existing timeline, media dissolve, CTA, and fallback tests continue to pass.
+7. Every seam keeps its lower layer at `1` while the upper layer eases from `0` to `1`; calculated composited coverage remains exactly `1` across the full band.
+8. Stable media stacking order is preserved in both scroll directions.
+9. Existing timeline, CTA, and fallback tests continue to pass.
 
-Desktop browser QA must check the hero, the center of all six scene bands, and at least one midpoint in every connector. The hero and all right-side scene centers must show a right-positioned, right-aligned panel and matching scrim; left-side scenes must remain left-positioned and left-aligned. Connector midpoints must show unobstructed footage with no text or scrim. The vertical route rail must be absent, the bottom status pill must remain visible, and the console must remain free of warnings and errors.
+Desktop browser QA must check the hero, the center of all six scene bands, at least one midpoint in every connector, and both sides plus the midpoint of every media seam. The hero and all right-side scene centers must show a right-positioned, right-aligned panel and matching scrim; left-side scenes must remain left-positioned and left-aligned. Connector midpoints must show unobstructed footage with no text or scrim. At seam midpoints the two active media opacities must be `1` and `0.5`, effective composited coverage must equal `1`, and no lavender background or particles may show through. The vertical route rail must be absent, the bottom status pill must remain visible, and the console must remain free of warnings and errors.
 
 ## Scope boundaries
 
-This change does not alter generated stills or videos, scene order, case copy, generic route behavior, media crossfade timing, scroll distances, header layout, mobile mode, or reduced-motion poster mode. The only route change is hiding the vertical rail in the Verndale desktop skin.
+This change does not alter generated stills or videos, scene order, case copy, generic route behavior, media crossfade timing, scroll distances, header layout, mobile mode, or reduced-motion poster mode. The only route change is hiding the vertical rail in the Verndale desktop skin. Media opacity math changes only inside seam bands to guarantee full composited coverage.
