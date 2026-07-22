@@ -68,9 +68,10 @@ export const CASES = [
   },
 ];
 
-export const CONNECTORS = Array.from({ length: CASES.length - 1 }, (_, index) =>
-  `public/assets/video/connector-${index + 1}.mp4`
-);
+export const CONNECTORS = Array.from({ length: CASES.length - 1 }, (_, index) => {
+  const cacheKey = index === 3 ? '?v=87b2bbc' : '';
+  return `public/assets/video/connector-${index + 1}.mp4${cacheKey}`;
+});
 
 export function createWorldConfig() {
   return {

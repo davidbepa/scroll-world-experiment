@@ -44,3 +44,11 @@ test('hero and case copy sides match the approved desktop composition', () => {
     ['right', 'left', 'left', 'right', 'right', 'left'],
   );
 });
+
+test('updated connector 4 has a distinct runtime cache key', () => {
+  assert.equal(CONNECTORS[3], 'public/assets/video/connector-4.mp4?v=87b2bbc');
+  assert.deepEqual(
+    CONNECTORS.filter((_, index) => index !== 3),
+    [1, 2, 3, 5].map(index => `public/assets/video/connector-${index}.mp4`),
+  );
+});
