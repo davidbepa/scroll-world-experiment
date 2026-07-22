@@ -87,7 +87,7 @@ export function createWorldConfig() {
     mobileMode: 'posters',
     hint: 'scroll to explore',
     diveScroll: 1.3,
-    connScroll: 0.8,
+    connScroll: 1.2,
     crossfade: 0.08,
     atmosphere: true,
     nav: false,

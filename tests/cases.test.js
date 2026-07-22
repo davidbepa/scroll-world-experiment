@@ -52,3 +52,9 @@ test('updated connector 4 has a distinct runtime cache key', () => {
     [1, 2, 3, 5].map(index => `public/assets/video/connector-${index}.mp4`),
   );
 });
+
+test('desktop connectors use the approved slower scroll span', () => {
+  const config = createWorldConfig();
+  assert.equal(config.connScroll, 1.2);
+  assert.equal(config.crossfade, 0.08);
+});
