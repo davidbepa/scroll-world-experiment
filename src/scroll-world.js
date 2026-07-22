@@ -139,9 +139,51 @@ function mountScrollWorld(container, config) {
   statusLabel.textContent = 'Scroll to explore';
   status.append(statusCount, statusBar, statusLabel);
 
+  const loader = el('div', 'sw-loader');
+  loader.setAttribute('role', 'status');
+  loader.setAttribute('aria-live', 'polite');
+  const loaderLogo = el('img', 'sw-loader__logo');
+  loaderLogo.src = 'public/assets/brand/verndale-logo.svg';
+  loaderLogo.alt = 'Verndale';
+  const loaderLabel = el('span', 'sw-loader__label');
+  loaderLabel.textContent = 'Preparing the experience';
+  const loaderBar = el('span', 'sw-loader__bar');
+  const loaderFill = el('i');
+  loaderBar.appendChild(loaderFill);
+  loader.append(loaderLogo, loaderLabel, loaderBar);
+
+  const chapterLoader = el('div', 'sw-chapter-loader');
+  chapterLoader.setAttribute('role', 'status');
+  chapterLoader.setAttribute('aria-live', 'polite');
+  chapterLoader.textContent = 'Loading next chapter';
+
   const track = el('div', 'sw-track');
-  const mountedNodes = [sky, scrollbar, topbar, stage, copylayer, route, hint, status, track];
+  const mountedNodes = [
+    sky, scrollbar, topbar, stage, copylayer, route, hint, status,
+    chapterLoader, track, loader,
+  ];
   mountedNodes.forEach(node => container.appendChild(node));
+  container.dataset.loading = 'true';
+
+  let scrollLocked = false;
+  const previousOverflow = {
+    html: document.documentElement.style.overflow,
+    body: document.body.style.overflow,
+  };
+
+  function lockScroll() {
+    if (scrollLocked) return;
+    scrollLocked = true;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unlockScroll() {
+    if (!scrollLocked) return;
+    scrollLocked = false;
+    document.documentElement.style.overflow = previousOverflow.html;
+    document.body.style.overflow = previousOverflow.body;
+  }
 
   // Segment scenes.
   SEGMENTS.forEach((s, index) => {
@@ -363,14 +405,33 @@ function mountScrollWorld(container, config) {
 
   async function startPreloading() {
     if (reduce || destroyed) {
+      loaderFill.style.transform = 'scaleX(1)';
+      loader.classList.add('is-complete');
+      container.dataset.loading = 'false';
       markInitialReady();
       return;
     }
     const position = window.scrollY || window.pageYOffset;
     const active = segmentIndexAt(position);
     const priority = selectPriorityIndices(SEGMENTS, position, 3);
-    await Promise.all(priority.map(index => loadClip(SEGMENTS[index])));
+    if (!priority.length) {
+      loaderFill.style.transform = 'scaleX(1)';
+      loader.classList.add('is-complete');
+      container.dataset.loading = 'false';
+      markInitialReady();
+      return;
+    }
+    lockScroll();
+    let settledPriority = 0;
+    await Promise.all(priority.map(async index => {
+      await loadClip(SEGMENTS[index]);
+      settledPriority += 1;
+      loaderFill.style.transform = `scaleX(${settledPriority / priority.length})`;
+    }));
     if (destroyed) return;
+    loader.classList.add('is-complete');
+    container.dataset.loading = 'false';
+    unlockScroll();
     markInitialReady();
     const background = backgroundPreloadOrder(SEGMENTS, priority, active);
     void runPreloadQueue(background, index => loadClip(SEGMENTS[index]), 2);
@@ -534,6 +595,7 @@ function mountScrollWorld(container, config) {
       segment.abortController?.abort();
       if (!segment.loadSettled && segment.resolveLoad) settleClip(segment, false);
     });
+    unlockScroll();
     markInitialReady();
     objectUrls.forEach(url => URL.revokeObjectURL(url));
     objectUrls.clear();
@@ -541,6 +603,7 @@ function mountScrollWorld(container, config) {
     mountedNodes.forEach(node => node.remove());
     container.classList.remove('sw-root');
     delete container.dataset.mode;
+    delete container.dataset.loading;
     releaseCSS(stylesheetLease);
   }
 
@@ -620,6 +683,14 @@ function injectCSS() {
     --sw-font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
     color:var(--sw-ink);font-family:var(--sw-font-body);}
   html,body{margin:0;background:var(--sw-bg,#F5EDE0);overflow-x:hidden;}
+  .sw-loader{position:fixed;inset:0;z-index:2000;display:grid;place-content:center;justify-items:center;gap:22px;background:#fff;opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s linear .45s;pointer-events:auto;}
+  .sw-loader.is-complete{opacity:0;visibility:hidden;pointer-events:none;}
+  .sw-loader__logo{display:block;width:clamp(170px,18vw,250px);height:auto;}
+  .sw-loader__label{font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-ink-soft);}
+  .sw-loader__bar{display:block;width:min(260px,62vw);height:3px;overflow:hidden;background:color-mix(in srgb,var(--sw-ink) 12%,transparent);}
+  .sw-loader__bar i{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:#6a2ff3;transition:transform .25s ease;}
+  .sw-chapter-loader{position:fixed;left:50%;bottom:66px;z-index:45;transform:translate(-50%,8px);padding:8px 14px;border-radius:999px;background:color-mix(in srgb,#fff 88%,transparent);color:var(--sw-ink);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility 0s linear .2s;backdrop-filter:blur(10px);pointer-events:none;}
+  .sw-chapter-loader.is-active{opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:0s;}
   .sw-sky{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--sw-bg);}
   .sw-sky__grad{position:absolute;inset:-10%;background:linear-gradient(178deg,color-mix(in srgb,var(--sw-accent) 12%,var(--sw-bg)) 0%,var(--sw-bg) 55%,color-mix(in srgb,var(--sw-accent) 6%,var(--sw-bg)) 100%);}
   .sw-sky__glow{position:absolute;inset:0;background:radial-gradient(60% 42% at 74% 16%,color-mix(in srgb,var(--sw-accent) 22%,transparent),transparent 70%),radial-gradient(46% 34% at 50% 50%,color-mix(in srgb,#fff 45%,transparent),transparent 70%);}

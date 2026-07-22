@@ -111,3 +111,12 @@ test('header uses the supplied official logo asset', async () => {
   assert.match(logo, /viewBox="0 0 390\.35 81\.36"/);
   assert.match(logo, /fill="#ffb800"/);
 });
+
+test('film loader uses the official logo and exposes both loading states', () => {
+  assert.match(engine, /public\/assets\/brand\/verndale-logo\.svg/);
+  assert.match(engine, /Preparing the experience/);
+  assert.match(engine, /Loading next chapter/);
+  assert.match(engine, /\.sw-loader\{/);
+  assert.match(engine, /\.sw-loader\.is-complete\{/);
+  assert.match(engine, /\.sw-chapter-loader\.is-active\{/);
+});

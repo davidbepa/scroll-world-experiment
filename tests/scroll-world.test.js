@@ -250,6 +250,64 @@ test('priority clip fetches are idempotent and settle after decoded data', async
   }
 });
 
+test('initial loader locks scrolling until priority clips settle', async () => {
+  let resolveFetch;
+  const fixture = createBrowserFixture({
+    reduceMotion: false,
+    fetchImpl: () => new Promise(resolve => { resolveFetch = resolve; }),
+  });
+  fixture.document.documentElement.style.overflow = 'clip';
+  fixture.document.body.style.overflow = 'auto';
+  try {
+    const root = fixture.createRoot();
+    const controller = mountScrollWorld(root, {
+      atmosphere: false,
+      nav: false,
+      sections: [{ id: 'one', label: 'One', still: '', clip: 'one.mp4' }],
+      connectors: [],
+    });
+    const [loader] = root.querySelectorAll('.sw-loader');
+    assert.ok(loader);
+    assert.equal(fixture.document.documentElement.style.overflow, 'hidden');
+    assert.equal(fixture.document.body.style.overflow, 'hidden');
+    resolveFetch({ ok: true, blob: async () => ({ url: 'one.mp4' }) });
+    await flush();
+    const [video] = root.querySelectorAll('.sw-scene__video');
+    video.duration = 5;
+    video.dispatch('loadedmetadata');
+    video.dispatch('loadeddata');
+    await controller.whenReady;
+    assert.equal(loader.classList.contains('is-complete'), true);
+    assert.equal(fixture.document.documentElement.style.overflow, 'clip');
+    assert.equal(fixture.document.body.style.overflow, 'auto');
+    controller.destroy();
+  } finally {
+    fixture.restore();
+  }
+});
+
+test('destroy restores scrolling while priority media is pending', () => {
+  const fixture = createBrowserFixture({
+    reduceMotion: false,
+    fetchImpl: () => new Promise(() => {}),
+  });
+  fixture.document.documentElement.style.overflow = '';
+  fixture.document.body.style.overflow = 'scroll';
+  try {
+    const controller = mountScrollWorld(fixture.createRoot(), {
+      atmosphere: false,
+      nav: false,
+      sections: [{ id: 'one', label: 'One', still: '', clip: 'pending.mp4' }],
+      connectors: [],
+    });
+    controller.destroy();
+    assert.equal(fixture.document.documentElement.style.overflow, '');
+    assert.equal(fixture.document.body.style.overflow, 'scroll');
+  } finally {
+    fixture.restore();
+  }
+});
+
 test('engine stylesheet remains until the last simultaneous mount is destroyed', () => {
   const fixture = createBrowserFixture();
   try {
